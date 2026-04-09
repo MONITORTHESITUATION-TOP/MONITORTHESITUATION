@@ -602,12 +602,13 @@
 
   // Ordre de préférence des exchanges (spot USD/USDT en priorité, liquidité décroissante)
   const EXCHANGE_PRIORITY = [
-    "COINBASE","KRAKEN","BINANCE","BITSTAMP","GEMINI",
-    "BYBIT","OKX","KUCOIN","HUOBI","BITFINEX"
+    // Coinbase retiré de la priorité auto — trop de paires inexistantes en spot
+    // On le garde uniquement dans TV_SYMBOLS pour les tokens mappés manuellement
+    "KRAKEN","BINANCE","OKX","BYBIT","BITSTAMP",
+    "KUCOIN","HUOBI","BITFINEX","GEMINI","MEXC"
   ];
 
   // Résout le meilleur symbole TradingView via leur API de recherche publique
-  // Retourne ex: "KRAKEN:CCUSD" ou null si introuvable
   async function resolveTVSymbol(coinSymbol) {
     const s = coinSymbol.toUpperCase();
     try {
@@ -619,23 +620,31 @@
       const data = await res.json();
       const symbols = data?.symbols || [];
 
-      // On filtre : on veut le ticker exact (pas SBTC quand on cherche BTC)
-      // et on préfère les paires USD ou USDT
+      // Filtre : ticker de base exact uniquement
       const exact = symbols.filter(item => {
-        const base = (item.symbol || "").replace(/USD[T]?$/, "").replace(/BTC$/, "").toUpperCase();
+        const base = (item.symbol || "")
+          .replace(/USD[T]?$/, "").replace(/USDT$/, "").replace(/BTC$/, "").toUpperCase();
         return base === s;
       });
 
-      const pool = exact.length > 0 ? exact : symbols; // fallback si pas de match exact
+      const pool = exact.length > 0 ? exact : symbols;
 
-      // On trie par ordre de priorité d'exchange, puis on préfère USD > USDT > autres
-      const scored = pool.map(item => {
-        const exch = (item.exchange || "").toUpperCase();
-        const sym  = (item.symbol || "").toUpperCase();
-        const exchScore = EXCHANGE_PRIORITY.indexOf(exch);
-        const pairScore = sym.endsWith("USD") ? 0 : sym.endsWith("USDT") ? 1 : 2;
-        return { item, exchScore: exchScore === -1 ? 99 : exchScore, pairScore };
-      });
+      // Score : exchange prioritaire + préférence USD spot > USDT > autres
+      // On exclut les paires perpetual/futures (contiennent PERP, .P, _PERP)
+      const scored = pool
+        .filter(item => {
+          const sym = (item.symbol || "").toUpperCase();
+          const desc = (item.description || "").toLowerCase();
+          // Exclure perps et futures
+          return !sym.includes("PERP") && !sym.endsWith(".P") && !desc.includes("perpetual") && !desc.includes("future");
+        })
+        .map(item => {
+          const exch = (item.exchange || "").toUpperCase();
+          const sym  = (item.symbol || "").toUpperCase();
+          const exchScore = EXCHANGE_PRIORITY.indexOf(exch);
+          const pairScore = sym.endsWith("USD") ? 0 : sym.endsWith("USDT") ? 1 : 2;
+          return { item, exchScore: exchScore === -1 ? 99 : exchScore, pairScore };
+        });
 
       scored.sort((a, b) =>
         a.exchScore !== b.exchScore ? a.exchScore - b.exchScore : a.pairScore - b.pairScore
@@ -649,26 +658,27 @@
     }
   }
 
-  // Cache pour éviter de re-fetcher à chaque monitor du même token
+  // Cache session
   const tvSymbolCache = {};
 
+  // Fonction unique de rendu du chart — plus de tryTVSymbol / getCandidateSymbols
   async function renderChart(coinId, coinName, coinSymbol) {
     const section   = document.getElementById("chart-section");
     const container = document.getElementById("tv-chart");
     document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
     section.style.display = "block";
-    container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:100%">Looking for chart…</div>`;
+    container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:520px">Looking for chart…</div>`;
 
-    // 1. Mapping manuel connu → direct, pas d'appel réseau
+    // 1. Mapping manuel → fiable à 100%, pas d'appel réseau
     let tvSym = TV_SYMBOLS[coinId] || null;
 
     // 2. Cache session
     if (!tvSym && tvSymbolCache[coinId]) tvSym = tvSymbolCache[coinId];
 
-    // 3. Recherche via API TradingView
+    // 3. API TradingView search — source de vérité
     if (!tvSym) {
       tvSym = await resolveTVSymbol(coinSymbol);
-      if (tvSym) tvSymbolCache[coinId] = tvSym; // on met en cache
+      if (tvSym) tvSymbolCache[coinId] = tvSym;
     }
 
     if (!tvSym) {
@@ -691,8 +701,6 @@
       hide_legend: false, save_image: false,
     });
   }
-
-  // Toutes les requêtes CoinGecko passent par notre proxy Vercel
   function cgFetch(path, params={}) {
     const qs = new URLSearchParams({path, ...params}).toString();
     return fetch(`/api/coingecko?${qs}`).then(r => {
@@ -811,94 +819,6 @@
   function setError(msg){const b=`<div class="error-box">⚠ ${msg}</div>`;["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=b);}
 
   // Génère une liste de symboles candidats à tester dans l'ordre
-  function getCandidateSymbols(coinId, coinSymbol) {
-    // Mapping manuel pour les cas connus — fiable à 100%
-    if (TV_SYMBOLS[coinId]) return [TV_SYMBOLS[coinId]];
-    const s = coinSymbol.toUpperCase();
-    // Coinbase en premier : paires spot fiables, bon historique, pas de perps parasites
-    // Binance en second : très liquide mais parfois que des perps sur les small caps
-    return [
-      `COINBASE:${s}USD`,
-      `KRAKEN:${s}USD`,
-      `BINANCE:${s}USDT`,
-      `BYBIT:${s}USDT`,
-      `OKX:${s}USDT`,
-      `BINANCE:${s}BTC`,
-    ];
-  }
-
-  // Crée un widget TradingView et retourne une Promise qui resolve
-  // avec true si le symbole est valide, false sinon (timeout 4s)
-  function tryTVSymbol(symbol, container) {
-    return new Promise(resolve => {
-      container.innerHTML = "";
-      if (tvWidget) { try { tvWidget.remove(); } catch(e) {} tvWidget = null; }
-
-      let resolved = false;
-      const done = (ok) => { if (!resolved) { resolved = true; resolve(ok); } };
-
-      // TradingView envoie un postMessage "tv-widget-load-failed" si symbole invalide
-      const onMsg = (e) => {
-        if (typeof e.data !== "object") return;
-        const t = e.data?.type || e.data?.name || "";
-        if (t === "tv-widget-load-failed" || t === "widgetReady" ||
-            (typeof t === "string" && t.includes("symbol_error"))) {
-          window.removeEventListener("message", onMsg);
-          done(t === "widgetReady");
-        }
-      };
-      window.addEventListener("message", onMsg);
-
-      try {
-        tvWidget = new TradingView.widget({
-          container_id: "tv-chart",
-          width: "100%", height: 520,
-          symbol: symbol, interval: "60",
-          timezone: "Etc/UTC", theme: "dark", style: "1", locale: "en",
-          toolbar_bg: "#061128",
-          enable_publishing: false, hide_top_toolbar: false,
-          hide_legend: false, save_image: false,
-          // Callback interne TradingView — se déclenche si le chart charge bien
-          onChartReady: () => { window.removeEventListener("message", onMsg); done(true); },
-        });
-      } catch(e) {
-        window.removeEventListener("message", onMsg);
-        done(false);
-        return;
-      }
-
-      // Timeout de sécurité : si pas de réponse en 4s, on considère OK
-      // (le widget a chargé silencieusement sans callback)
-      setTimeout(() => { window.removeEventListener("message", onMsg); done(true); }, 4000);
-    });
-  }
-
-  async function renderChart(coinId, coinName, coinSymbol) {
-    const section   = document.getElementById("chart-section");
-    const container = document.getElementById("tv-chart");
-    document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
-    document.getElementById("chart-sub").textContent   = "Live TradingView chart embedded in the dashboard.";
-    section.style.display = "block";
-
-    // Affiche un état "recherche du chart" pendant qu'on teste les symboles
-    container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:100%">Looking for chart…</div>`;
-
-    const candidates = getCandidateSymbols(coinId, coinSymbol || coinId);
-
-    for (const candidate of candidates) {
-      const ok = await tryTVSymbol(candidate, container);
-      if (ok) {
-        // Succès — on met à jour le sous-titre avec le symbole trouvé
-        document.getElementById("chart-sub").textContent = `Live TradingView chart — ${candidate}`;
-        return;
-      }
-    }
-
-    // Aucun candidat n'a fonctionné
-    if (tvWidget) { try { tvWidget.remove(); } catch(e) {} tvWidget = null; }
-    container.innerHTML = `<div class="chart-placeholder">No chart available for <strong>${coinName}</strong> on major exchanges.</div>`;
-  }
-
   // Assets fixes toujours présents dans la comparaison
   const compareCoins=[
     {label:"BTC",id:"bitcoin"},
