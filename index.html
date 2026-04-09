@@ -541,7 +541,7 @@
         <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${formatLargeNum(mcap)}</span></div>
         <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${formatLargeNum(fdv)}</span></div>
         <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${fmtSupply(supply)}</span></div>
-        <div class="metric"><span class="metric-label">Max Supply</span><span class="metric-value accent-pink">${main.max_supply?fmtSupply(main.max_supply):"∞"}</span></div>
+        <div class="metric"><span class="metric-label">Total Supply</span><span class="metric-value accent-pink">${main.total_supply?fmtSupply(main.total_supply):"N/A"}</span></div>
         <div class="metric"><span class="metric-label">24h Change</span><span class="metric-value">${fmtPct(pct24h)}</span></div>
         <div class="metric"><span class="metric-label">7D Change</span><span class="metric-value">${pct7d!==null?fmtPct(pct7d):"N/A"}</span></div>
         <div class="metric"><span class="metric-label">1M Change</span><span class="metric-value">${pct30d!==null?fmtPct(pct30d):"N/A"}</span></div>
