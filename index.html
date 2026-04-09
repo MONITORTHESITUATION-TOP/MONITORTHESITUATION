@@ -476,8 +476,27 @@
   // Assets ajoutés dynamiquement par l'user (session uniquement)
   let extraCompareCoins = [];
 
-  // État global pour re-render les tableaux après Add/Remove
-  let currentByIdRef={}, currentCoinId=null, currentSupply=null, currentMcap=null, currentSym="";
+  function renderTables() {
+    const allCoins = [...compareCoins, ...extraCompareCoins];
+    let compRows="", bagRows="";
+    for(const coin of allCoins){
+      if(coin.id===currentCoinId)continue;
+      const t=currentByIdRef[coin.id];
+      if(!t?.market_cap||!currentSupply)continue;
+      const ps=t.market_cap/currentSupply;
+      const bag=1000000*ps;
+      const pct=currentMcap?((currentMcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
+      const removable = coin.removable
+        ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
+        : "";
+      compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
+      bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+    }
+    const compBody = document.getElementById("comp-table-body");
+    const bagBody  = document.getElementById("bag-table-body");
+    if(compBody) compBody.innerHTML = compRows || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
+    if(bagBody)  bagBody.innerHTML  = bagRows  || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+  }
 
   function removeExtraCoin(id){
     extraCompareCoins=extraCompareCoins.filter(c=>c.id!==id);
@@ -565,45 +584,27 @@
       </div>`;
 
       // ── Comparison + Bag
-      function buildCompRows(coins, byIdLocal, coinIdLocal, supplyLocal, mcapLocal, symLocal) {
-        let compRows="", bagRows="";
-        for(const coin of coins){
-          if(coin.id===coinIdLocal)continue;
-          const t=byIdLocal[coin.id];
-          if(!t?.market_cap||!supplyLocal)continue;
-          const ps=t.market_cap/supplyLocal;
-          const bag=1000000*ps;
-          const pct=mcapLocal?((mcapLocal/t.market_cap)*100).toFixed(2)+"%":"N/A";
-          const removable = coin.removable
-            ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
-            : "";
-          compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
-          bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
-        }
-        return {compRows, bagRows};
-      }
-
-      function renderTables() {
-        const allCoins = [...compareCoins, ...extraCompareCoins];
-        const {compRows, bagRows} = buildCompRows(allCoins, currentByIdRef, currentCoinId, currentSupply, currentMcap, currentSym);
-
-        document.getElementById("comp-table-body").innerHTML =
-          compRows || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
-        document.getElementById("bag-table-body").innerHTML =
-          bagRows || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
-      }
-
-      // Références globales pour re-render après Add
       currentByIdRef = {...byId};
       currentCoinId  = coinId;
       currentSupply  = supply;
       currentMcap    = mcap;
       currentSym     = sym;
 
-      const {compRows, bagRows} = buildCompRows(
-        [...compareCoins, ...extraCompareCoins],
-        byId, coinId, supply, mcap, sym
-      );
+      const {compRows, bagRows} = (()=>{
+        let compRows="", bagRows="";
+        for(const coin of [...compareCoins,...extraCompareCoins]){
+          if(coin.id===coinId)continue;
+          const t=byId[coin.id];
+          if(!t?.market_cap||!supply)continue;
+          const ps=t.market_cap/supply;
+          const bag=1000000*ps;
+          const pct=mcap?((mcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
+          const removable=coin.removable?`<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`:"";
+          compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
+          bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+        }
+        return {compRows,bagRows};
+      })();
 
       document.getElementById("comparisons").innerHTML=`
         <div class="table-wrap"><table>
