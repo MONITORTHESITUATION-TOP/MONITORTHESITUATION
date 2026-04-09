@@ -21,8 +21,10 @@ export default async function handler(req, res) {
   try {
     const headers = { "Accept": "application/json" };
 
-    // If you get a CoinGecko API key later, add it here:
-    // headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
+    // Clé API CoinGecko Demo — injectée via variable d'environnement Vercel
+    if (process.env.COINGECKO_API_KEY) {
+      headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
+    }
 
     const upstream = await fetch(url, { headers });
 
