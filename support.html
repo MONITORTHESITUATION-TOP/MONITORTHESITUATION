@@ -133,31 +133,31 @@
     }
     .support-grid {
       display:grid; grid-template-columns:repeat(3,1fr);
-      gap:24px; max-width:900px; margin:0 auto;
+      gap:28px; max-width:1100px; margin:0 auto;
     }
     .support-card {
-      padding:36px 28px; text-align:center;
+      padding:56px 40px; text-align:center;
       background:var(--panel);
       border:1px solid var(--border);
-      border-top:2px solid var(--gold);
+      border-top:3px solid var(--gold);
       position:relative;
     }
     .coming-soon-badge {
-      position:absolute; top:14px; right:14px;
+      position:absolute; top:16px; right:16px;
       font-family:'Rajdhani',monospace;
-      font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
+      font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
       color:var(--gold); border:1px solid rgba(255,211,107,0.3);
-      padding:3px 7px; background:rgba(255,211,107,0.05);
+      padding:4px 10px; background:rgba(255,211,107,0.05);
     }
-    .support-card-icon { font-size:42px; margin-bottom:18px; display:block; }
+    .support-card-icon { font-size:64px; margin-bottom:24px; display:block; }
     .support-card h3 {
       font-family:'Rajdhani',monospace;
-      font-size:20px; font-weight:700;
+      font-size:28px; font-weight:700;
       text-transform:uppercase; letter-spacing:1.5px;
-      color:white; margin-bottom:10px;
+      color:white; margin-bottom:14px;
     }
     .support-card p {
-      font-size:14px; line-height:1.6;
+      font-size:17px; line-height:1.7;
       color:var(--muted);
       font-family:"Trebuchet MS","Verdana",sans-serif;
     }
@@ -181,8 +181,15 @@
       color:var(--muted); margin-bottom:14px;
       font-family:"Trebuchet MS","Verdana",sans-serif;
     }
-    @media(max-width:700px){
-      .support-grid { grid-template-columns:1fr; max-width:400px; }
+    @media(max-width:900px){
+      .support-grid { grid-template-columns:1fr 1fr; }
+      .support-grid > :last-child:nth-child(odd) { grid-column: 1 / -1; max-width:480px; margin:0 auto; }
+    }
+    @media(max-width:600px){
+      .support-grid { grid-template-columns:1fr; max-width:480px; }
+      .support-card { padding:36px 24px; }
+      .support-card-icon { font-size:48px; }
+      .support-card h3 { font-size:22px; }
     }
   </style>
 </head>
@@ -203,8 +210,7 @@
       <h1>Keep it <span>free</span></h1>
       <p>Monitor The Situation is built and maintained independently. It costs nothing to use — and it will stay that way.</p>
       <p>If you find this dashboard useful, here are three ways to help keep it alive and free for everyone.</p>
-      <div class="free-tag">100% free — always</div>
-    </div>
+      </div>
 
     <div class="wrap" style="padding-top:0">
       <div class="support-grid">
