@@ -131,10 +131,17 @@
     </section>
 
     <section class="section">
-      <h2 class="section-title" id="bag-title">1,000,000 Token Bag Value Simulation</h2>
-      <p class="section-sub" id="bag-sub">Hypothetical dollar value of a 1,000,000 token bag at each simulated target price.</p>
+      <h2 class="section-title" id="bag-title">Bag Value Simulation</h2>
+      <p class="section-sub" id="bag-sub">Hypothetical dollar value of your bag at each simulated target price.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+        <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
+        <input type="number" id="bag-amount-input" value="1" min="1"
+          style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
+          placeholder="Enter your bag…"/>
+        <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
+      </div>
       <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-      <div class="footer-note" id="bag-formula">Formula: 1,000,000 tokens × hypothetical price at same market cap.</div>
+      <div class="footer-note" id="bag-formula">Formula: your bag × hypothetical price at same market cap.</div>
     </section>
 
     <section class="section">
@@ -476,26 +483,85 @@
   // Assets ajoutés dynamiquement par l'user (session uniquement)
   let extraCompareCoins = [];
 
+  // État global pour re-render les tableaux après Add/Remove/Sort/BagChange
+  let currentByIdRef={}, currentCoinId=null, currentSupply=null, currentMcap=null, currentSym="";
+  let currentBagAmount = 1;
+  let sortComp  = {col:"mcap", dir:"desc"};
+  let sortBag   = {col:"price", dir:"desc"};
+
   function renderTables() {
-    const allCoins = [...compareCoins, ...extraCompareCoins];
-    let compRows="", bagRows="";
-    for(const coin of allCoins){
-      if(coin.id===currentCoinId)continue;
-      const t=currentByIdRef[coin.id];
-      if(!t?.market_cap||!currentSupply)continue;
-      const ps=t.market_cap/currentSupply;
-      const bag=1000000*ps;
-      const pct=currentMcap?((currentMcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
+    const allCoins = [...compareCoins, ...extraCompareCoins]
+      .filter(c => c.id !== currentCoinId && currentByIdRef[c.id]?.market_cap && currentSupply);
+
+    // Calcul des rows
+    let rows = allCoins.map(coin => {
+      const t   = currentByIdRef[coin.id];
+      const ps  = t.market_cap / currentSupply;
+      const bag = currentBagAmount * ps;
+      const pct = currentMcap ? (currentMcap / t.market_cap * 100) : null;
+      return { coin, mcap: t.market_cap, ps, bag, pct };
+    });
+
+    // Tri comparaison
+    rows.sort((a,b) => {
+      const v = (r) => sortComp.col==="mcap" ? r.mcap : sortComp.col==="price" ? r.ps : r.pct||0;
+      return sortComp.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
+    });
+
+    // Indicateur de tri dans les headers
+    const compCols = ["mcap","price","pct"];
+    const compHeaders = ["MCAP","${currentSym} Price","% of MCAP"];
+    const thComp = ["Asset","MCAP",`${currentSym} Price`,"% of MCAP"].map((label,i)=>{
+      if(i===0) return `<th>Asset</th>`;
+      const colKey = ["mcap","price","pct"][i-1];
+      const arrow  = sortComp.col===colKey ? (sortComp.dir==="desc"?" ↓":" ↑") : " ↕";
+      return `<th style="cursor:pointer;user-select:none" onclick="sortCompTable('${colKey}')">${label}${arrow}</th>`;
+    }).join("");
+
+    const compRows = rows.map(({coin,mcap,ps,pct})=>{
       const removable = coin.removable
         ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
         : "";
-      compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
-      bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
-    }
+      const pctStr = pct!==null ? pct.toFixed(2)+"%" : "N/A";
+      return `<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(mcap)}</td><td>$${fmtPrice(ps)}</td><td>${pctStr}</td></tr>`;
+    }).join("") || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
+
+    // Tri bag
+    const bagRowsSorted = [...rows].sort((a,b)=>{
+      const v = (r) => sortBag.col==="price" ? r.ps : r.bag;
+      return sortBag.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
+    });
+    const thBag = ["Asset",`${currentSym} Hyp. Price`,"Bag Value"].map((label,i)=>{
+      if(i===0) return `<th>Asset</th>`;
+      const colKey = ["price","bag"][i-1];
+      const arrow  = sortBag.col===colKey ? (sortBag.dir==="desc"?" ↓":" ↑") : " ↕";
+      return `<th style="cursor:pointer;user-select:none" onclick="sortBagTable('${colKey}')">${label}${arrow}</th>`;
+    }).join("");
+
+    const bagRows = bagRowsSorted.map(({coin,ps,bag})=>{
+      const removable = coin.removable
+        ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
+        : "";
+      return `<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+    }).join("") || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+
     const compBody = document.getElementById("comp-table-body");
     const bagBody  = document.getElementById("bag-table-body");
-    if(compBody) compBody.innerHTML = compRows || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
-    if(bagBody)  bagBody.innerHTML  = bagRows  || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+    const compHead = document.getElementById("comp-table-head");
+    const bagHead  = document.getElementById("bag-table-head");
+    if(compBody) compBody.innerHTML = compRows;
+    if(bagBody)  bagBody.innerHTML  = bagRows;
+    if(compHead) compHead.innerHTML = thComp;
+    if(bagHead)  bagHead.innerHTML  = thBag;
+  }
+
+  function sortCompTable(col){
+    sortComp = sortComp.col===col && sortComp.dir==="desc" ? {col,dir:"asc"} : {col,dir:"desc"};
+    renderTables();
+  }
+  function sortBagTable(col){
+    sortBag = sortBag.col===col && sortBag.dir==="desc" ? {col,dir:"asc"} : {col,dir:"desc"};
+    renderTables();
   }
 
   function removeExtraCoin(id){
@@ -590,28 +656,12 @@
       currentMcap    = mcap;
       currentSym     = sym;
 
-      const {compRows, bagRows} = (()=>{
-        let compRows="", bagRows="";
-        for(const coin of [...compareCoins,...extraCompareCoins]){
-          if(coin.id===coinId)continue;
-          const t=byId[coin.id];
-          if(!t?.market_cap||!supply)continue;
-          const ps=t.market_cap/supply;
-          const bag=1000000*ps;
-          const pct=mcap?((mcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
-          const removable=coin.removable?`<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`:"";
-          compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
-          bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
-        }
-        return {compRows,bagRows};
-      })();
-
       document.getElementById("comparisons").innerHTML=`
         <div class="table-wrap"><table>
-          <thead><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr></thead>
-          <tbody id="comp-table-body">${compRows||'<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>'}</tbody>
+          <thead id="comp-table-head"><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr></thead>
+          <tbody id="comp-table-body"></tbody>
         </table></div>
-        <div class="add-compare-row" style="display:flex;gap:10px;align-items:stretch;margin-top:16px;flex-wrap:wrap">
+        <div style="display:flex;gap:10px;align-items:stretch;margin-top:16px;flex-wrap:wrap">
           <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
             <input type="text" id="add-compare-input" placeholder="Add any crypto to compare…"
               autocomplete="off" spellcheck="false"
@@ -626,16 +676,32 @@
 
       document.getElementById("bag-simulations").innerHTML=`
         <div class="table-wrap"><table>
-          <thead><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr></thead>
-          <tbody id="bag-table-body">${bagRows||'<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>'}</tbody>
+          <thead id="bag-table-head"><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr></thead>
+          <tbody id="bag-table-body"></tbody>
         </table></div>`;
 
+      // Bag amount input
+      const bagInput = document.getElementById("bag-amount-input");
+      const bagDisplay = document.getElementById("bag-amount-display");
+      if(bagInput){
+        bagInput.addEventListener("input",()=>{
+          const v = parseFloat(bagInput.value);
+          if(!isNaN(v) && v > 0){
+            currentBagAmount = v;
+            bagDisplay.textContent = `= ${Number(v).toLocaleString()} token${v===1?"":"s"}`;
+            renderTables();
+          }
+        });
+      }
+
+      renderTables();
+
       // ── Autocomplete pour Add compare
-      let addSearchResults=[], addDebounce=null, addSelected=null, addHighlight=-1;
-      const addInput  = document.getElementById("add-compare-input");
-      const addAC     = document.getElementById("add-compare-autocomplete");
-      const addBtn    = document.getElementById("add-compare-btn");
-      const addErr    = document.getElementById("add-compare-error");
+      let addSearchResults=[], addDebounce=null, addSelected=null;
+      const addInput = document.getElementById("add-compare-input");
+      const addAC    = document.getElementById("add-compare-autocomplete");
+      const addBtn   = document.getElementById("add-compare-btn");
+      const addErr   = document.getElementById("add-compare-error");
 
       addInput.addEventListener("input",()=>{
         clearTimeout(addDebounce);
@@ -645,7 +711,6 @@
           try{
             const data=await cgFetch("/search",{query:q});
             addSearchResults=(data.coins||[]).slice(0,6);
-            addHighlight=-1;
             if(!addSearchResults.length){addAC.classList.remove("open");return;}
             addAC.innerHTML=addSearchResults.map((c,i)=>`
               <div class="autocomplete-item" data-i="${i}">
@@ -667,29 +732,30 @@
         },320);
       });
 
-      document.addEventListener("click",e=>{if(!e.target.closest("#add-compare-input")&&!e.target.closest("#add-compare-autocomplete"))addAC.classList.remove("open");});
+      document.addEventListener("click",e=>{
+        if(!e.target.closest("#add-compare-input")&&!e.target.closest("#add-compare-autocomplete"))
+          addAC.classList.remove("open");
+      });
 
       addBtn.addEventListener("click", async()=>{
         if(!addSelected)return;
-        // Vérifie pas déjà présent
         const allIds2=[...compareCoins,...extraCompareCoins].map(c=>c.id);
         if(allIds2.includes(addSelected.id)||addSelected.id===coinId){
           addErr.textContent="Already in comparison.";addErr.style.display="block";return;
         }
         addErr.style.display="none";
-        addBtn.disabled=true;
-        addBtn.textContent="Loading…";
+        addBtn.disabled=true; addBtn.textContent="Loading…";
         try{
           const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:addSelected.id});
           if(!res||!res[0]?.market_cap) throw new Error("No market data");
           currentByIdRef[addSelected.id]=res[0];
           extraCompareCoins.push({label:addSelected.symbol.toUpperCase(),id:addSelected.id,removable:true});
           renderTables();
-          addInput.value=""; addSelected=null;
-        }catch(e){
+          addInput.value=""; addSelected=null; addBtn.disabled=true;
+        }catch{
           addErr.textContent="Could not fetch data for this token.";addErr.style.display="block";
         }finally{
-          addBtn.disabled=false; addBtn.textContent="+ Add";
+          addBtn.textContent="+ Add";
         }
       });
 
