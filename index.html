@@ -353,6 +353,7 @@
     if(n >= 10000)  return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
     if(n >= 1000)   return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
     if(n >= 100)    return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+    if(n >= 10)     return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
     if(n >= 1)      return n.toLocaleString(undefined, {maximumFractionDigits: 4, minimumFractionDigits: 2});
     if(n >= 0.01)   return n.toLocaleString(undefined, {maximumFractionDigits: 4, minimumFractionDigits: 4});
     if(n >= 0.0001) return n.toLocaleString(undefined, {maximumFractionDigits: 6, minimumFractionDigits: 6});
@@ -463,12 +464,25 @@
     container.innerHTML = `<div class="chart-placeholder">No chart available for <strong>${coinName}</strong> on major exchanges.</div>`;
   }
 
+  // Assets fixes toujours présents dans la comparaison
   const compareCoins=[
-    {label:"BTC",id:"bitcoin"},{label:"ETH",id:"ethereum"},{label:"BNB",id:"binancecoin"},
-    {label:"SOL",id:"solana"},{label:"LINK",id:"chainlink"},{label:"SHIB",id:"shiba-inu"},
-    {label:"BONK",id:"bonk"},{label:"QNT",id:"quant-network"},{label:"MANA",id:"decentraland"},
-    {label:"THETA",id:"theta-token"}
+    {label:"BTC",id:"bitcoin"},
+    {label:"ETH",id:"ethereum"},
+    {label:"LINK",id:"chainlink"},
+    {label:"SOL",id:"solana"},
+    {label:"XRP",id:"ripple"},
   ];
+
+  // Assets ajoutés dynamiquement par l'user (session uniquement)
+  let extraCompareCoins = [];
+
+  // État global pour re-render les tableaux après Add/Remove
+  let currentByIdRef={}, currentCoinId=null, currentSupply=null, currentMcap=null, currentSym="";
+
+  function removeExtraCoin(id){
+    extraCompareCoins=extraCompareCoins.filter(c=>c.id!==id);
+    renderTables();
+  }
 
   async function loadData(coinId,coinName,coinSymbol){
     const sym=coinSymbol.toUpperCase();
@@ -550,27 +564,133 @@
         ${tvBlock}
       </div>`;
 
-      // ── Comparison + Bag (point 5 : arrondi intelligent sur les prix simulés)
-      let compRows="",bagRows="";
-      for(const coin of compareCoins){
-        if(coin.id===coinId)continue;
-        const t=byId[coin.id];
-        if(!t?.market_cap||!supply)continue;
-        const ps=t.market_cap/supply;
-        const bag=1000000*ps;
-        const pct=mcap?((mcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
-        compRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
-        bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+      // ── Comparison + Bag
+      function buildCompRows(coins, byIdLocal, coinIdLocal, supplyLocal, mcapLocal, symLocal) {
+        let compRows="", bagRows="";
+        for(const coin of coins){
+          if(coin.id===coinIdLocal)continue;
+          const t=byIdLocal[coin.id];
+          if(!t?.market_cap||!supplyLocal)continue;
+          const ps=t.market_cap/supplyLocal;
+          const bag=1000000*ps;
+          const pct=mcapLocal?((mcapLocal/t.market_cap)*100).toFixed(2)+"%":"N/A";
+          const removable = coin.removable
+            ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
+            : "";
+          compRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
+          bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+        }
+        return {compRows, bagRows};
       }
 
-      document.getElementById("comparisons").innerHTML=`<div class="table-wrap"><table>
-        <tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr>
-        ${compRows||'<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>'}
-      </table></div>`;
-      document.getElementById("bag-simulations").innerHTML=`<div class="table-wrap"><table>
-        <tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr>
-        ${bagRows||'<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>'}
-      </table></div>`;
+      function renderTables() {
+        const allCoins = [...compareCoins, ...extraCompareCoins];
+        const {compRows, bagRows} = buildCompRows(allCoins, currentByIdRef, currentCoinId, currentSupply, currentMcap, currentSym);
+
+        document.getElementById("comp-table-body").innerHTML =
+          compRows || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
+        document.getElementById("bag-table-body").innerHTML =
+          bagRows || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+      }
+
+      // Références globales pour re-render après Add
+      currentByIdRef = {...byId};
+      currentCoinId  = coinId;
+      currentSupply  = supply;
+      currentMcap    = mcap;
+      currentSym     = sym;
+
+      const {compRows, bagRows} = buildCompRows(
+        [...compareCoins, ...extraCompareCoins],
+        byId, coinId, supply, mcap, sym
+      );
+
+      document.getElementById("comparisons").innerHTML=`
+        <div class="table-wrap"><table>
+          <thead><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr></thead>
+          <tbody id="comp-table-body">${compRows||'<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>'}</tbody>
+        </table></div>
+        <div class="add-compare-row" style="display:flex;gap:10px;align-items:stretch;margin-top:16px;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+            <input type="text" id="add-compare-input" placeholder="Add any crypto to compare…"
+              autocomplete="off" spellcheck="false"
+              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+            <div class="autocomplete-list" id="add-compare-autocomplete"></div>
+          </div>
+          <button id="add-compare-btn"
+            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+            disabled>+ Add</button>
+        </div>
+        <div id="add-compare-error" style="margin-top:8px;font-size:13px;color:var(--pink);display:none"></div>`;
+
+      document.getElementById("bag-simulations").innerHTML=`
+        <div class="table-wrap"><table>
+          <thead><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr></thead>
+          <tbody id="bag-table-body">${bagRows||'<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>'}</tbody>
+        </table></div>`;
+
+      // ── Autocomplete pour Add compare
+      let addSearchResults=[], addDebounce=null, addSelected=null, addHighlight=-1;
+      const addInput  = document.getElementById("add-compare-input");
+      const addAC     = document.getElementById("add-compare-autocomplete");
+      const addBtn    = document.getElementById("add-compare-btn");
+      const addErr    = document.getElementById("add-compare-error");
+
+      addInput.addEventListener("input",()=>{
+        clearTimeout(addDebounce);
+        const q=addInput.value.trim();
+        if(q.length<2){addAC.classList.remove("open");addAC.innerHTML="";return;}
+        addDebounce=setTimeout(async()=>{
+          try{
+            const data=await cgFetch("/search",{query:q});
+            addSearchResults=(data.coins||[]).slice(0,6);
+            addHighlight=-1;
+            if(!addSearchResults.length){addAC.classList.remove("open");return;}
+            addAC.innerHTML=addSearchResults.map((c,i)=>`
+              <div class="autocomplete-item" data-i="${i}">
+                <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
+                <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
+                <span class="autocomplete-name">${c.name}</span>
+              </div>`).join("");
+            addAC.querySelectorAll(".autocomplete-item").forEach((el,i)=>{
+              el.addEventListener("mousedown",e=>{
+                e.preventDefault();
+                addSelected=addSearchResults[i];
+                addInput.value=`${addSelected.name} (${addSelected.symbol.toUpperCase()})`;
+                addBtn.disabled=false;
+                addAC.classList.remove("open");
+              });
+            });
+            addAC.classList.add("open");
+          }catch{addAC.classList.remove("open");}
+        },320);
+      });
+
+      document.addEventListener("click",e=>{if(!e.target.closest("#add-compare-input")&&!e.target.closest("#add-compare-autocomplete"))addAC.classList.remove("open");});
+
+      addBtn.addEventListener("click", async()=>{
+        if(!addSelected)return;
+        // Vérifie pas déjà présent
+        const allIds2=[...compareCoins,...extraCompareCoins].map(c=>c.id);
+        if(allIds2.includes(addSelected.id)||addSelected.id===coinId){
+          addErr.textContent="Already in comparison.";addErr.style.display="block";return;
+        }
+        addErr.style.display="none";
+        addBtn.disabled=true;
+        addBtn.textContent="Loading…";
+        try{
+          const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:addSelected.id});
+          if(!res||!res[0]?.market_cap) throw new Error("No market data");
+          currentByIdRef[addSelected.id]=res[0];
+          extraCompareCoins.push({label:addSelected.symbol.toUpperCase(),id:addSelected.id,removable:true});
+          renderTables();
+          addInput.value=""; addSelected=null;
+        }catch(e){
+          addErr.textContent="Could not fetch data for this token.";addErr.style.display="block";
+        }finally{
+          addBtn.disabled=false; addBtn.textContent="+ Add";
+        }
+      });
 
       // ── Market Context (points 2 & 3)
       let ctx="";
