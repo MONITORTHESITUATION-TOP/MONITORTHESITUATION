@@ -259,8 +259,8 @@
       font-family: "Trebuchet MS","Verdana",sans-serif;
     }
     .live-value {
-      font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
-      font-size: 34px; line-height: 1; color: var(--cyan);
+      font-family: 'Rajdhani', 'Arial Black', sans-serif;
+      font-size: 34px; line-height: 1; color: var(--cyan); font-weight: 700; letter-spacing: 0.5px;
     }
 
     /* ═══════════════ SECTIONS ═══════════════ */
@@ -320,8 +320,8 @@
 
     .metric-value {
       display: block;
-      font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
-      font-size: 30px; line-height: 1.08; color: white; word-break: break-word;
+      font-family: 'Rajdhani', 'Arial Black', sans-serif;
+      font-size: 30px; line-height: 1.08; color: white; word-break: break-word; font-weight: 700; letter-spacing: 0.5px;
     }
 
     .metric-value.accent-cyan  { color: var(--cyan); }
@@ -347,9 +347,10 @@
 
     th {
       position: sticky; top: 0;
-      background: rgba(3,4,15,0.99);
-      color: var(--muted); font-size: 12px;
-      text-transform: uppercase; letter-spacing: 2px; z-index: 1;
+      background: rgba(6,8,24,0.99);
+      color: rgba(255,255,255,0.75); font-size: 13px;
+      text-transform: uppercase; letter-spacing: 1.5px; z-index: 1;
+      font-weight: 700;
     }
 
     td { color: white; font-size: 17px; font-weight: 600; }
@@ -581,35 +582,91 @@
 
   <script src="https://s3.tradingview.com/tv.js"></script>
   <script>
-  const TV_SYMBOLS = {
-    "bitcoin":"COINBASE:BTCUSD","ethereum":"COINBASE:ETHUSD","ripple":"COINBASE:XRPUSD",
-    "solana":"COINBASE:SOLUSD","cardano":"COINBASE:ADAUSD","dogecoin":"COINBASE:DOGEUSD",
-    "shiba-inu":"BINANCE:SHIBUSD","chainlink":"COINBASE:LINKUSD","polkadot":"COINBASE:DOTUSD",
-    "avalanche-2":"COINBASE:AVAXUSD","uniswap":"COINBASE:UNIUSD","litecoin":"COINBASE:LTCUSD",
-    "stellar":"COINBASE:XLMUSD","tron":"BINANCE:TRXUSDT","ethereum-classic":"COINBASE:ETCUSD",
-    "monero":"KRAKEN:XMRUSD","cosmos":"COINBASE:ATOMUSD","near":"COINBASE:NEARUSD",
-    "injective-protocol":"BINANCE:INJUSDT","aptos":"COINBASE:APTUSD","sui":"COINBASE:SUIUSD",
-    "bonk":"COINBASE:BONKUSD","pepe":"BINANCE:PEPEUSDT","floki":"BINANCE:FLOKIUSDT",
-    "quant-network":"BINANCE:QNTUSDT","decentraland":"COINBASE:MANAUSD",
-    "theta-token":"BINANCE:THETAUSDT","zksync":"COINBASE:ZKUSD","mantra":"BINANCE:OMUSDT",
-    "rize":"KRAKEN:RIZEUSD","canton-network":"KRAKEN:CCUSD","fetch-ai":"BINANCE:FETUSDT",
-    "pudgy-penguins":"COINBASE:PENGUUSD","render-token":"COINBASE:RENDERUSD",
-    "immutable-x":"COINBASE:IMXUSD","internet-computer":"COINBASE:ICPUSD",
-    "filecoin":"COINBASE:FILUSD","the-graph":"COINBASE:GRTUSD",
-    "optimism":"COINBASE:OPUSD","arbitrum":"COINBASE:ARBUSD","celestia":"COINBASE:TIAUSD",
-    "stacks":"COINBASE:STXUSD","sei-network":"COINBASE:SEIUSD",
+  // Mapping exchange name CoinGecko → identifiant TradingView
+  const CG_TO_TV_EXCHANGE = {
+    "binance":             "BINANCE",
+    "coinbase exchange":   "COINBASE",
+    "coinbase":            "COINBASE",
+    "gdax":                "COINBASE",
+    "kraken":              "KRAKEN",
+    "okex":                "OKX",
+    "okx":                 "OKX",
+    "bybit":               "BYBIT",
+    "bybit_spot":          "BYBIT",
+    "bitstamp":            "BITSTAMP",
+    "kucoin":              "KUCOIN",
+    "huobi":               "HUOBI",
+    "bitfinex":            "BITFINEX",
+    "gemini":              "GEMINI",
+    "mexc":                "MEXC",
+    "gate":                "GATEIO",
+    "gate.io":             "GATEIO",
+    "whitebit":            "WHITEBIT",
+    "bitget":              "BITGET",
+    "htx":                 "HTX",
+    "bingx":               "BINGX",
+    "lbank":               "LBANK",
+    "phemex":              "PHEMEX",
+    "crypto.com exchange": "CRYPTO",
+    "crypto.com":          "CRYPTO",
   };
 
-  // Ordre de préférence des exchanges (spot USD/USDT en priorité, liquidité décroissante)
+  // Ordre de préférence des exchanges TradingView
   const EXCHANGE_PRIORITY = [
-    // Coinbase retiré de la priorité auto — trop de paires inexistantes en spot
-    // On le garde uniquement dans TV_SYMBOLS pour les tokens mappés manuellement
-    "KRAKEN","BINANCE","OKX","BYBIT","BITSTAMP",
-    "KUCOIN","HUOBI","BITFINEX","GEMINI","MEXC"
+    "BINANCE","COINBASE","KRAKEN","OKX","BYBIT",
+    "BITSTAMP","KUCOIN","BITFINEX","GEMINI","MEXC",
+    "WHITEBIT","GATEIO","BITGET","HTX","CRYPTO"
   ];
 
-  // Résout le meilleur symbole TradingView via leur API de recherche publique
-  async function resolveTVSymbol(coinSymbol) {
+  // Paires quote préférées dans l'ordre
+  const QUOTE_PRIORITY = ["USD","USDT","USDC","EUR","BTC"];
+
+  // ── Méthode 1 : résolution depuis les tickers CoinGecko (zéro requête supplémentaire)
+  function resolveFromCGTickers(tickers, coinSymbol) {
+    if (!tickers || !tickers.length) return null;
+    const base = coinSymbol.toUpperCase();
+
+    // Filtre : on garde uniquement les tickers dont la base correspond à notre token
+    // et dont l'exchange est dans notre mapping TV
+    const candidates = [];
+    for (const t of tickers) {
+      const tickerBase  = (t.base  || "").toUpperCase();
+      const tickerQuote = (t.target|| "").toUpperCase();
+      const exchName    = (t.market?.name || "").toLowerCase().trim();
+      const tvExch      = CG_TO_TV_EXCHANGE[exchName] || null;
+
+      if (!tvExch) continue;
+      if (tickerBase !== base) continue;
+      // Exclure les paires synthétiques/perp (CoinGecko les tag parfois)
+      if (t.market?.identifier?.includes("_futures")) continue;
+      if (t.market?.identifier?.includes("_perp"))    continue;
+
+      const quoteScore = QUOTE_PRIORITY.indexOf(tickerQuote);
+      const exchScore  = EXCHANGE_PRIORITY.indexOf(tvExch);
+
+      candidates.push({
+        symbol: `${tvExch}:${tickerBase}${tickerQuote}`,
+        exchScore: exchScore === -1 ? 99 : exchScore,
+        quoteScore: quoteScore === -1 ? 99 : quoteScore,
+        // Bonus si le ticker a du volume (CoinGecko fournit converted_volume)
+        volume: t.converted_volume?.usd || 0,
+      });
+    }
+
+    if (!candidates.length) return null;
+
+    // Tri : exchange prioritaire → quote prioritaire → volume décroissant
+    candidates.sort((a, b) => {
+      if (a.exchScore  !== b.exchScore)  return a.exchScore  - b.exchScore;
+      if (a.quoteScore !== b.quoteScore) return a.quoteScore - b.quoteScore;
+      return b.volume - a.volume;
+    });
+
+    return candidates[0].symbol;
+  }
+
+  // ── Méthode 2 : fallback TV search (si CoinGecko ne donne rien)
+  async function resolveFromTVSearch(coinSymbol) {
     const s = coinSymbol.toUpperCase();
     try {
       const res = await fetch(
@@ -620,34 +677,30 @@
       const data = await res.json();
       const symbols = data?.symbols || [];
 
-      // Filtre : ticker de base exact uniquement
       const exact = symbols.filter(item => {
-        const base = (item.symbol || "")
-          .replace(/USD[T]?$/, "").replace(/USDT$/, "").replace(/BTC$/, "").toUpperCase();
+        const raw  = (item.symbol || "").toUpperCase();
+        const base = raw.replace(/USDT$/, "").replace(/USD$/, "").replace(/USDC$/, "")
+                        .replace(/BTC$/, "").replace(/ETH$/, "").replace(/EUR$/, "");
         return base === s;
       });
 
-      const pool = exact.length > 0 ? exact : symbols;
+      const pool = exact.length > 0 ? exact : symbols.slice(0, 10);
+      const filtered = pool.filter(item => {
+        const sym = (item.symbol || "").toUpperCase();
+        return !sym.includes("_PERP") && !sym.endsWith(".P");
+      });
+      const finalPool = filtered.length > 0 ? filtered : pool;
 
-      // Score : exchange prioritaire + préférence USD spot > USDT > autres
-      // On exclut les paires perpetual/futures (contiennent PERP, .P, _PERP)
-      const scored = pool
-        .filter(item => {
-          const sym = (item.symbol || "").toUpperCase();
-          const desc = (item.description || "").toLowerCase();
-          // Exclure perps et futures
-          return !sym.includes("PERP") && !sym.endsWith(".P") && !desc.includes("perpetual") && !desc.includes("future");
-        })
-        .map(item => {
-          const exch = (item.exchange || "").toUpperCase();
-          const sym  = (item.symbol || "").toUpperCase();
-          const exchScore = EXCHANGE_PRIORITY.indexOf(exch);
-          const pairScore = sym.endsWith("USD") ? 0 : sym.endsWith("USDT") ? 1 : 2;
-          return { item, exchScore: exchScore === -1 ? 99 : exchScore, pairScore };
-        });
+      const scored = finalPool.map(item => {
+        const exch = (item.exchange || "").toUpperCase();
+        const sym  = (item.symbol   || "").toUpperCase();
+        const exchScore  = EXCHANGE_PRIORITY.indexOf(exch);
+        const quoteScore = QUOTE_PRIORITY.findIndex(q => sym.endsWith(q));
+        return { item, exchScore: exchScore === -1 ? 99 : exchScore, quoteScore: quoteScore === -1 ? 99 : quoteScore };
+      });
 
       scored.sort((a, b) =>
-        a.exchScore !== b.exchScore ? a.exchScore - b.exchScore : a.pairScore - b.pairScore
+        a.exchScore !== b.exchScore ? a.exchScore - b.exchScore : a.quoteScore - b.quoteScore
       );
 
       if (!scored.length) return null;
@@ -661,23 +714,28 @@
   // Cache session
   const tvSymbolCache = {};
 
-  // Fonction unique de rendu du chart — plus de tryTVSymbol / getCandidateSymbols
-  async function renderChart(coinId, coinName, coinSymbol) {
+  // ── Rendu du chart : 3 niveaux de résolution
+  async function renderChart(coinId, coinName, coinSymbol, cgTickers) {
     const section   = document.getElementById("chart-section");
     const container = document.getElementById("tv-chart");
     document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
     section.style.display = "block";
     container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:520px">Looking for chart…</div>`;
 
-    // 1. Mapping manuel → fiable à 100%, pas d'appel réseau
-    let tvSym = TV_SYMBOLS[coinId] || null;
+    let tvSym = null;
 
-    // 2. Cache session
-    if (!tvSym && tvSymbolCache[coinId]) tvSym = tvSymbolCache[coinId];
+    // 1. Cache session
+    if (tvSymbolCache[coinId]) tvSym = tvSymbolCache[coinId];
 
-    // 3. API TradingView search — source de vérité
+    // 3. CoinGecko tickers → résolution directe, zéro requête supplémentaire
+    if (!tvSym && cgTickers) {
+      tvSym = resolveFromCGTickers(cgTickers, coinSymbol);
+      if (tvSym) tvSymbolCache[coinId] = tvSym;
+    }
+
+    // 4. TV search API → dernier recours
     if (!tvSym) {
-      tvSym = await resolveTVSymbol(coinSymbol);
+      tvSym = await resolveFromTVSearch(coinSymbol);
       if (tvSym) tvSymbolCache[coinId] = tvSym;
     }
 
@@ -926,7 +984,10 @@
     document.getElementById("hero-price").textContent="Loading…";
     document.getElementById("metrics-sub").textContent=`Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
     document.getElementById("comp-sub").textContent=`Hypothetical ${sym} price if ${coinName} market cap matched each asset's — and the value of your bag at that price.`;
-    setLoading(); monitorBtn.disabled=true; setSearchError(""); renderChart(coinId,coinName,sym);
+    setLoading(); monitorBtn.disabled=true; setSearchError("");
+
+    // On lance renderChart APRÈS avoir récupéré detail pour lui passer les tickers CG
+    // (renderChart sera appelé dans le try block ci-dessous)
 
     const compareIds=compareCoins.map(c=>c.id).filter(id=>id!==coinId);
     // On force chainlink dans le fetch pour toujours pouvoir calculer sa dominance
@@ -947,9 +1008,14 @@
       const main=byId[coinId];
       if(!main)throw new Error(`Token "${coinId}" not found in market data.`);
 
+      // On lance le chart maintenant qu'on a les tickers CoinGecko dans detail
+      const cgTickers = detail?.tickers || null;
+      renderChart(coinId, coinName, coinSymbol, cgTickers);
+
       const {current_price:price,market_cap:mcap,fully_diluted_valuation:fdv,
              circulating_supply:supply,price_change_percentage_24h:pct24h,
-             ath,market_cap_rank:rank}=main;
+             ath,ath_date,market_cap_rank:rank}=main;
+      const daysSinceAth = ath_date ? Math.floor((Date.now()-new Date(ath_date))/(1000*60*60*24)) : null;
 
       // Récupère les % de variation depuis perfData (contient 7d/30d/90d)
       const mainPerf = perfById[coinId] || main;
@@ -982,6 +1048,7 @@
       // ── Core Metrics (point 5 : arrondi intelligent via fmtPrice)
       document.getElementById("main-data").innerHTML=`<div class="metrics">
         <div class="metric"><span class="metric-label">Price</span><span class="metric-value accent-cyan">$${fmtPrice(price)}</span></div>
+        <div class="metric"><span class="metric-label">Rank</span><span class="metric-value accent-cyan">${rank?"#"+rank:"N/A"}</span></div>
         <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${formatLargeNum(mcap)}</span></div>
         <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${formatLargeNum(fdv)}</span></div>
         <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${fmtSupply(supply)}</span></div>
@@ -991,6 +1058,7 @@
         <div class="metric"><span class="metric-label">1M Change</span><span class="metric-value">${pct30d!==null?fmtPct(pct30d):"N/A"}</span></div>
         <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">$${fmtPrice(ath)}</span></div>
         ${athBlock}
+        ${daysSinceAth!==null?`<div class="metric"><span class="metric-label">Last ATH</span><span class="metric-value" style="font-size:22px;color:var(--muted)">${daysSinceAth}d ago</span></div>`:""}
         ${tvBlock}
       </div>`;
 
@@ -1023,12 +1091,13 @@
           const v = parseFloat(freshBag.value);
           if(!isNaN(v) && v > 0){
             currentBagAmount = v;
-            if(bagDisplay) bagDisplay.textContent = `= ${Number(v).toLocaleString()} token${v===1?"":"s"}`;
+            if(bagDisplay) bagDisplay.textContent = `= ${Number(v).toLocaleString()} ${currentSym||'token'}${v===1?'':'s'}`;
             renderTables();
           }
         });
       }
 
+      if(bagDisplay) bagDisplay.textContent = `= ${currentBagAmount.toLocaleString()} ${sym}`;
       renderTables();
 
       // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
@@ -1170,7 +1239,8 @@
       <a href="/app">App</a>
       <a href="/support" class="nav-support">♥ Support the app — keep it free</a>
     </nav>
-    <p class="footer-copy">© 2025 Monitor The Situation — Live data terminal</p>
+    <p class="footer-copy">© 2026 Monitor The Situation — Live data terminal</p>
   </footer>
 </body>
+</html>
 </html>
