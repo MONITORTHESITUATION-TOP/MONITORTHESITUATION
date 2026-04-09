@@ -568,12 +568,11 @@
         const mcapPcts = globalData.data.market_cap_percentage;
         const btcDom  = mcapPcts.btc;
         const ethDom  = mcapPcts.eth;
-        // LINK dominance : calculée depuis son mcap (présent dans byId) / total market cap
+        const totalCap= globalData.data.total_market_cap.usd;
+        // LINK dominance : calculée depuis son mcap / total market cap
         const linkMcap = byId["chainlink"]?.market_cap || null;
         const linkDom  = linkMcap && totalCap ? (linkMcap / totalCap * 100) : null;
-        const totalCap= globalData.data.total_market_cap.usd;
-
-        // Dominance de l'asset sélectionné (point 3) — on calcule depuis mcap/totalCap
+        // Dominance de l'asset sélectionné
         const coinDomPct = mcap && totalCap ? (mcap / totalCap * 100) : null;
 
         const fear    = fearGreed?.data?.[0]?.value||"N/A";
