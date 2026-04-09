@@ -101,18 +101,18 @@
     }
 
     h1 {
-  margin: 0;
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  font-weight: 800;
-  font-size: clamp(42px, 5.5vw, 72px);
-  line-height: 1.05;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #ffffff;
-  text-shadow:
-    0 0 12px rgba(126, 224, 255, 0.12),
-    0 0 24px rgba(255, 211, 107, 0.06);
-}
+      margin: 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-weight: 800;
+      font-size: clamp(42px, 5.5vw, 72px);
+      line-height: 1.05;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow:
+        0 0 12px rgba(126, 224, 255, 0.12),
+        0 0 24px rgba(255, 211, 107, 0.06);
+    }
 
     .hero-sub {
       margin-top: 14px;
@@ -159,6 +159,60 @@
       color: var(--cyan);
     }
 
+    .search-wrap {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-input {
+      min-width: 280px;
+      flex: 0 1 340px;
+      padding: 14px 16px;
+      border: 1px solid rgba(126, 224, 255, 0.22);
+      background: rgba(5, 14, 34, 0.7);
+      color: white;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .search-input::placeholder {
+      color: rgba(182, 193, 216, 0.75);
+    }
+
+    .search-button {
+      padding: 14px 18px;
+      border: 1px solid rgba(126, 224, 255, 0.22);
+      background: rgba(126, 224, 255, 0.1);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .search-button:hover {
+      background: rgba(126, 224, 255, 0.16);
+    }
+
+    .status-line {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .status-line.error {
+      color: #ff9b9b;
+    }
+
+    .status-line.success {
+      color: var(--green);
+    }
+
     .section {
       margin-bottom: 28px;
       padding: 26px;
@@ -169,16 +223,16 @@
       box-shadow: var(--shadow);
     }
 
-   .section-title {
-  margin: 0 0 8px 0;
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  font-weight: 700;
-  font-size: 32px;
-  line-height: 1.1;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: white;
-}
+    .section-title {
+      margin: 0 0 8px 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      line-height: 1.1;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: white;
+    }
 
     .section-sub {
       margin: 0 0 20px 0;
@@ -292,6 +346,14 @@
       line-height: 1.45;
     }
 
+    .chart-placeholder {
+      padding: 28px;
+      border: 1px dashed rgba(255,255,255,0.14);
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255,255,255,0.02);
+    }
+
     @media (max-width: 1100px) {
       .metrics {
         grid-template-columns: repeat(2, minmax(180px, 1fr));
@@ -331,276 +393,578 @@
       td {
         font-size: 15px;
       }
+
+      .search-input {
+        min-width: 100%;
+      }
+
+      .search-button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body class="scanlines">
   <div class="wrap">
     <section class="hero">
-      <div class="eyebrow">RIZE Market Monitor</div>
+      <div class="eyebrow" id="hero-eyebrow">RIZE Market Monitor</div>
       <div class="hero-grid">
         <div>
           <h1>MONITOR THE RIZE SITUATION</h1>
           <div class="hero-sub">
-            Real-time market data, RIZE-to-market-cap scenario analysis, and bag projections
+            Real-time market data, token-to-market-cap scenario analysis, and bag projections
             against selected crypto assets — in one retro terminal.
           </div>
+
+          <div class="search-wrap">
+            <input
+              id="token-input"
+              class="search-input"
+              type="text"
+              placeholder="Enter a token (e.g. rize, btc, ethereum, link)"
+              autocomplete="off"
+            />
+            <button id="analyze-button" class="search-button" type="button">Analyze</button>
+          </div>
+
+          <div id="search-status" class="status-line"></div>
         </div>
+
         <div class="hero-right">
           <div class="live-box">
-            <div class="live-label">Live RIZE Price</div>
+            <div class="live-label">Live Token Price</div>
             <div class="live-value" id="hero-price">Loading...</div>
           </div>
         </div>
       </div>
     </section>
 
-      <section class="section">
-  <h2 class="section-title">RIZE / USD Chart</h2>
-  <p class="section-sub">
-    Live TradingView chart embedded directly into the dashboard.
-  </p>
-
-  <div id="tv-chart" style="height: 600px;"></div>
-</section>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
-<script>
-  new TradingView.widget({
-    container_id: "tv-chart",
-    width: "100%",
-    height: 600,
-    symbol: "KRAKEN:RIZEUSD",
-    interval: "60",
-    timezone: "Etc/UTC",
-    theme: "dark",
-    style: "1",
-    locale: "en",
-    toolbar_bg: "#061128",
-    enable_publishing: false,
-    hide_top_toolbar: false,
-    hide_legend: false,
-    save_image: false
-  });
-</script>
+    <section class="section">
+      <h2 class="section-title" id="chart-title">RIZE / USD Chart</h2>
+      <p class="section-sub" id="chart-sub">
+        Live TradingView chart embedded directly into the dashboard.
+      </p>
+      <div id="tv-chart" style="height: 600px;"></div>
+    </section>
 
     <section class="section">
-      <h2 class="section-title">Core Metrics</h2>
-      <p class="section-sub">
-        Live snapshot of RIZE valuation metrics using CoinGecko market data and TVL.
+      <h2 class="section-title" id="core-title">Core Metrics</h2>
+      <p class="section-sub" id="core-sub">
+        Live snapshot of token valuation metrics using CoinGecko market data and TVL.
       </p>
       <div id="main-data">Loading main data...</div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">Price Comparison vs Other Crypto Market Caps</h2>
-      <p class="section-sub">
-        Hypothetical RIZE price if RIZE market cap matched each asset’s current market cap.
+      <h2 class="section-title" id="comparison-title">Price Comparison vs Other Crypto Market Caps</h2>
+      <p class="section-sub" id="comparison-sub">
+        Hypothetical token price if its market cap matched each asset’s current market cap.
       </p>
       <div id="comparisons">Loading comparisons...</div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">1,000,000 RIZE Bag Value Simulation</h2>
-      <p class="section-sub">
-        Hypothetical dollar value of a 1,000,000 RIZE bag if RIZE reached each simulated target price above.
+      <h2 class="section-title" id="bag-title">1,000,000 Token Bag Value Simulation</h2>
+      <p class="section-sub" id="bag-sub">
+        Hypothetical dollar value of a 1,000,000 token bag if the selected asset reached each simulated target price above.
       </p>
       <div id="bag-simulations">Loading bag simulations...</div>
       <div class="footer-note">
-        Formula used: 1,000,000 RIZE × hypothetical RIZE price at same market cap.
+        Formula used: 1,000,000 tokens × hypothetical token price at same market cap.
       </div>
     </section>
-<section class="section">
-  <h2 class="section-title">Market Context</h2>
-  <p class="section-sub">
-    Broader market positioning, relative performance, and valuation signal.
-  </p>
-  <div id="market-context">Loading market context...</div>
-</section>
-    
+
+    <section class="section">
+      <h2 class="section-title">Market Context</h2>
+      <p class="section-sub">
+        Broader market positioning, relative performance, and valuation signal.
+      </p>
+      <div id="market-context">Loading market context...</div>
+    </section>
   </div>
 
+  <script src="https://s3.tradingview.com/tv.js"></script>
   <script>
-async function loadData() {
-  const mainBox = document.getElementById("main-data");
-  const comparisonBox = document.getElementById("comparisons");
-  const bagBox = document.getElementById("bag-simulations");
-  const heroPriceBox = document.getElementById("hero-price");
-  const marketContextBox = document.getElementById("market-context");
+    let currentTvWidget = null;
 
-  const bagAmount = 1000000;
+    const compareCoins = [
+      { label: "LINK", id: "chainlink" },
+      { label: "CC", id: "canton-network" },
+      { label: "SHIB", id: "shiba-inu" },
+      { label: "QNT", id: "quant-network" },
+      { label: "BONK", id: "bonk" },
+      { label: "PENGU", id: "pudgy-penguins" },
+      { label: "MANA", id: "decentraland" },
+      { label: "THETA", id: "theta-token" },
+      { label: "ZK", id: "zksync" },
+      { label: "MANTRA", id: "mantra" }
+    ];
 
-  const compareCoins = [
-    { label: "LINK", id: "chainlink" },
-    { label: "CC", id: "canton-network" },
-    { label: "SHIB", id: "shiba-inu" },
-    { label: "QNT", id: "quant-network" },
-    { label: "BONK", id: "bonk" },
-    { label: "PENGU", id: "pudgy-penguins" },
-    { label: "MANA", id: "decentraland" },
-    { label: "THETA", id: "theta-token" },
-    { label: "ZK", id: "zksync" },
-    { label: "MANTRA", id: "mantra" }
-  ];
+    const tokenAliases = {
+      rize: "rize",
+      btc: "bitcoin",
+      bitcoin: "bitcoin",
+      eth: "ethereum",
+      ethereum: "ethereum",
+      sol: "solana",
+      solana: "solana",
+      link: "chainlink",
+      chainlink: "chainlink",
+      qnt: "quant-network",
+      quant: "quant-network",
+      shib: "shiba-inu",
+      bonk: "bonk",
+      mana: "decentraland",
+      theta: "theta-token",
+      zk: "zksync",
+      om: "mantra",
+      mantra: "mantra",
+      cc: "canton-network",
+      canton: "canton-network"
+    };
 
-  const allIds = ["rize", ...compareCoins.map(c => c.id)].join(",");
+    const chartSymbolMap = {
+      rize: "KRAKEN:RIZEUSD",
+      bitcoin: "BINANCE:BTCUSDT",
+      ethereum: "BINANCE:ETHUSDT",
+      solana: "BINANCE:SOLUSDT",
+      chainlink: "BINANCE:LINKUSDT",
+      "quant-network": "COINBASE:QNTUSD",
+      "shiba-inu": "BINANCE:SHIBUSDT",
+      bonk: "BINANCE:BONKUSDT",
+      decentraland: "BINANCE:MANAUSDT",
+      "theta-token": "BINANCE:THETAUSDT",
+      zksync: "BINANCE:ZKUSDT",
+      mantra: "BINANCE:OMUSDT",
+      "canton-network": "COINBASE:BTCUSD"
+    };
 
-  try {
-    const [marketsRes, rizeDetailRes, globalRes, fearGreedRes, perfRes] = await Promise.all([
-      fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${allIds}`),
-      fetch("https://api.coingecko.com/api/v3/coins/rize"),
-      fetch("https://api.coingecko.com/api/v3/global"),
-      fetch("https://api.alternative.me/fng/?limit=1"),
-      fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=rize,bitcoin,ethereum,chainlink&price_change_percentage=7d")
-    ]);
-
-    if (!marketsRes.ok || !rizeDetailRes.ok || !globalRes.ok || !fearGreedRes.ok || !perfRes.ok) {
-      throw new Error("API error");
+    function fmtUsd(v, digits = 2) {
+      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
+      return "$" + Number(v).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits
+      });
     }
 
-    const markets = await marketsRes.json();
-    const rizeDetail = await rizeDetailRes.json();
-    const globalData = await globalRes.json();
-    const fearGreedData = await fearGreedRes.json();
-    const perfData = await perfRes.json();
-
-    const byId = Object.fromEntries(markets.map(c => [c.id, c]));
-    const perfById = Object.fromEntries(perfData.map(c => [c.id, c]));
-
-    const rize = byId["rize"];
-
-    const price = rize.current_price;
-    const mcap = rize.market_cap;
-    const fdv = rize.fully_diluted_valuation;
-    const supply = rize.circulating_supply;
-    const tvl = rizeDetail.market_data.total_value_locked.usd;
-
-    const mcapTvl = mcap / tvl;
-    const fdvTvl = fdv / tvl;
-
-    const btcDom = globalData.data.market_cap_percentage.btc;
-    const ethDom = globalData.data.market_cap_percentage.eth;
-    const totalCap = globalData.data.total_market_cap.usd;
-
-    const fear = fearGreedData.data[0].value;
-    const fearText = fearGreedData.data[0].value_classification;
-
-    function fmtUsd(v) {
-      return "$" + Number(v).toLocaleString();
+    function fmtUsdFixed(v, digits = 2) {
+      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
+      return "$" + Number(v).toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
     }
 
     function fmtPct(v) {
+      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
       return Number(v).toFixed(2) + "%";
     }
 
-    function formatMarketCap(value) {
-  if (!value) return "N/A";
-
-  if (value >= 1e12) {
-    return (value / 1e12).toFixed(2) + "T";
-  } else if (value >= 1e9) {
-    return (value / 1e9).toFixed(2) + "B";
-  } else {
-    return "$" + Number(value).toLocaleString();
-  }
-}
-
-    heroPriceBox.textContent = "$" + price;
-
-    // CORE METRICS
-    mainBox.innerHTML = `
-      <div class="metrics">
-        <div class="metric"><span class="metric-label">Price</span><span class="metric-value accent-cyan">$${price}</span></div>
-        <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${fmtUsd(mcap)}</span></div>
-        <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${fmtUsd(fdv)}</span></div>
-        <div class="metric"><span class="metric-label">TVL</span><span class="metric-value accent-green">${fmtUsd(tvl)}</span></div>
-        <div class="metric"><span class="metric-label">MCAP / TVL</span><span class="metric-value">${mcapTvl.toFixed(2)}</span></div>
-        <div class="metric"><span class="metric-label">FDV / TVL</span><span class="metric-value">${fdvTvl.toFixed(2)}</span></div>
-      </div>
-    `;
-
-    // COMPARISON + BAG
-    let compRows = "";
-    let bagRows = "";
-
-    for (const coin of compareCoins) {
-      const target = byId[coin.id];
-      const targetMcap = target.market_cap;
-      const priceSim = targetMcap / supply;
-      const bag = bagAmount * priceSim;
-
-      compRows += `<tr>
-        <td><span class="asset-tag">${coin.label}</span></td>
-        <td>${fmtUsd(targetMcap)}</td>
-        <td>$${priceSim.toFixed(6)}</td>
-        <td>${((mcap / targetMcap) * 100).toFixed(2)}%</td>
-      </tr>`;
-
-      bagRows += `<tr>
-        <td><span class="asset-tag">${coin.label}</span></td>
-        <td>$${priceSim.toFixed(6)}</td>
-        <td>${fmtUsd(bag)}</td>
-      </tr>`;
+    function fmtNumber(v, digits = 2) {
+      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
+      return Number(v).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits
+      });
     }
 
-    comparisonBox.innerHTML = `
-      <div class="table-wrap">
-        <table>
-          <tr><th>Asset</th><th>MCAP</th><th>RIZE Price</th><th>%</th></tr>
-          ${compRows}
-        </table>
-      </div>
-    `;
+    function formatMarketCap(value) {
+      if (!value) return "N/A";
+      if (value >= 1e12) return (value / 1e12).toFixed(2) + "T";
+      if (value >= 1e9) return (value / 1e9).toFixed(2) + "B";
+      return "$" + Number(value).toLocaleString();
+    }
 
-    bagBox.innerHTML = `
-      <div class="table-wrap">
-        <table>
-          <tr><th>Asset</th><th>RIZE Price</th><th>Bag Value</th></tr>
-          ${bagRows}
-        </table>
-      </div>
-    `;
+    function setStatus(message = "", type = "") {
+      const el = document.getElementById("search-status");
+      el.textContent = message;
+      el.className = "status-line" + (type ? " " + type : "");
+    }
 
-    // MARKET CONTEXT
-    const valuation =
-      mcapTvl < 0.3 ? "Undervalued 🟢" :
-      mcapTvl <= 1 ? "Fair Value 🟡" :
-      "Overvalued 🔴";
+    function normalizeInput(value) {
+      return (value || "").trim().toLowerCase();
+    }
 
-    marketContextBox.innerHTML = `
-      <div class="metrics">
-        <div class="metric"><span class="metric-label">BTC Dominance</span><span class="metric-value accent-cyan">${fmtPct(btcDom)}</span></div>
-        <div class="metric"><span class="metric-label">ETH Dominance</span><span class="metric-value">${fmtPct(ethDom)}</span></div>
-        <div class="metric"><span class="metric-label">Total Market Cap</span><span class="metric-value accent-gold">$${formatMarketCap(totalCap)}</span></div>
-        <div class="metric"><span class="metric-label">Fear & Greed</span><span class="metric-value">${fear} (${fearText})</span></div>
-      </div>
+    function updateUrlToken(tokenId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("token", tokenId);
+      window.history.replaceState({}, "", url);
+    }
 
-      <br>
+    function getInitialTokenInput() {
+      const url = new URL(window.location.href);
+      return normalizeInput(url.searchParams.get("token")) || "rize";
+    }
 
-      <div class="table-wrap">
-        <table>
-          <tr><th>Asset</th><th>7D Performance</th></tr>
-          <tr><td><span class="asset-tag">RIZE</span></td><td>${fmtPct(perfById["rize"].price_change_percentage_7d_in_currency)}</td></tr>
-          <tr><td><span class="asset-tag">BTC</span></td><td>${fmtPct(perfById["bitcoin"].price_change_percentage_7d_in_currency)}</td></tr>
-          <tr><td><span class="asset-tag">ETH</span></td><td>${fmtPct(perfById["ethereum"].price_change_percentage_7d_in_currency)}</td></tr>
-          <tr><td><span class="asset-tag">LINK</span></td><td>${fmtPct(perfById["chainlink"].price_change_percentage_7d_in_currency)}</td></tr>
-        </table>
-      </div>
+    async function resolveTokenId(rawInput) {
+      const input = normalizeInput(rawInput);
+      if (!input) throw new Error("Please enter a token.");
 
-      <br>
+      if (tokenAliases[input]) {
+        return tokenAliases[input];
+      }
 
-      <div class="metric">
-        <span class="metric-label">Valuation Zone</span>
-        <span class="metric-value">${valuation}</span>
-      </div>
-    `;
+      const res = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(input)}`);
+      if (!res.ok) throw new Error("Unable to search token right now.");
 
-  } catch (e) {
-    console.error(e);
-  }
-}
+      const data = await res.json();
+      const coins = data?.coins || [];
+      if (!coins.length) throw new Error("Token not found.");
 
-loadData();
-</script>
+      const exact =
+        coins.find(c => normalizeInput(c.id) === input) ||
+        coins.find(c => normalizeInput(c.symbol) === input) ||
+        coins.find(c => normalizeInput(c.name) === input);
+
+      return (exact || coins[0]).id;
+    }
+
+    function destroyTradingViewWidget() {
+      const container = document.getElementById("tv-chart");
+      container.innerHTML = "";
+      currentTvWidget = null;
+    }
+
+    function renderChart(tokenId, symbolLabel) {
+      const container = document.getElementById("tv-chart");
+      const title = document.getElementById("chart-title");
+      const sub = document.getElementById("chart-sub");
+
+      title.textContent = `${symbolLabel} Chart`;
+
+      const tvSymbol = chartSymbolMap[tokenId];
+      destroyTradingViewWidget();
+
+      if (!tvSymbol || typeof TradingView === "undefined") {
+        sub.textContent = "TradingView chart is currently unavailable for this asset in V1.";
+        container.innerHTML = `
+          <div class="chart-placeholder">
+            TradingView chart mapping is not available yet for ${symbolLabel}.
+          </div>
+        `;
+        return;
+      }
+
+      sub.textContent = "Live TradingView chart embedded directly into the dashboard.";
+
+      currentTvWidget = new TradingView.widget({
+        container_id: "tv-chart",
+        width: "100%",
+        height: 600,
+        symbol: tvSymbol,
+        interval: "60",
+        timezone: "Etc/UTC",
+        theme: "dark",
+        style: "1",
+        locale: "en",
+        toolbar_bg: "#061128",
+        enable_publishing: false,
+        hide_top_toolbar: false,
+        hide_legend: false,
+        save_image: false
+      });
+    }
+
+    async function loadData(tokenId = "rize") {
+      const mainBox = document.getElementById("main-data");
+      const comparisonBox = document.getElementById("comparisons");
+      const bagBox = document.getElementById("bag-simulations");
+      const heroPriceBox = document.getElementById("hero-price");
+      const marketContextBox = document.getElementById("market-context");
+      const tokenInput = document.getElementById("token-input");
+      const heroEyebrow = document.getElementById("hero-eyebrow");
+      const coreSub = document.getElementById("core-sub");
+      const comparisonSub = document.getElementById("comparison-sub");
+      const bagSub = document.getElementById("bag-sub");
+
+      const bagAmount = 1000000;
+
+      setStatus("Loading token data...");
+      heroPriceBox.textContent = "Loading...";
+      mainBox.innerHTML = "Loading main data...";
+      comparisonBox.innerHTML = "Loading comparisons...";
+      bagBox.innerHTML = "Loading bag simulations...";
+      marketContextBox.innerHTML = "Loading market context...";
+
+      const uniqueCompare = compareCoins.filter(c => c.id !== tokenId);
+      const allIds = [tokenId, ...uniqueCompare.map(c => c.id)].join(",");
+      const perfIds = [tokenId, "bitcoin", "ethereum", "chainlink"]
+        .filter((v, i, arr) => arr.indexOf(v) === i)
+        .join(",");
+
+      try {
+        const [marketsRes, tokenDetailRes, globalRes, fearGreedRes, perfRes] = await Promise.all([
+          fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${allIds}`),
+          fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(tokenId)}`),
+          fetch("https://api.coingecko.com/api/v3/global"),
+          fetch("https://api.alternative.me/fng/?limit=1"),
+          fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${perfIds}&price_change_percentage=7d`)
+        ]);
+
+        if (!marketsRes.ok || !tokenDetailRes.ok || !globalRes.ok || !fearGreedRes.ok || !perfRes.ok) {
+          throw new Error("One or more API calls failed.");
+        }
+
+        const markets = await marketsRes.json();
+        const tokenDetail = await tokenDetailRes.json();
+        const globalData = await globalRes.json();
+        const fearGreedData = await fearGreedRes.json();
+        const perfData = await perfRes.json();
+
+        const byId = Object.fromEntries(markets.map(c => [c.id, c]));
+        const perfById = Object.fromEntries(perfData.map(c => [c.id, c]));
+        const currentToken = byId[tokenId];
+
+        if (!currentToken) {
+          throw new Error("Selected token data is unavailable.");
+        }
+
+        const symbolLabel = (currentToken.symbol || tokenId).toUpperCase();
+
+        tokenInput.value = tokenId;
+        heroEyebrow.textContent = `${symbolLabel} Market Monitor`;
+        document.title = `${symbolLabel} Data Hub | Monitor The Situation`;
+        coreSub.textContent = `Live snapshot of ${symbolLabel} valuation metrics using CoinGecko market data and TVL.`;
+        comparisonSub.textContent = `Hypothetical ${symbolLabel} price if its market cap matched each asset’s current market cap.`;
+        bagSub.textContent = `Hypothetical dollar value of a 1,000,000 ${symbolLabel} bag if it reached each simulated target price above.`;
+
+        const price = currentToken.current_price ?? null;
+        const mcap = currentToken.market_cap ?? null;
+        const fdv = currentToken.fully_diluted_valuation ?? null;
+        const circulatingSupply = currentToken.circulating_supply ?? null;
+        const tvl = tokenDetail?.market_data?.total_value_locked?.usd ?? null;
+
+        const mcapTvl = (mcap && tvl) ? (mcap / tvl) : null;
+        const fdvTvl = (fdv && tvl) ? (fdv / tvl) : null;
+
+        const btcDom = globalData?.data?.market_cap_percentage?.btc ?? null;
+        const ethDom = globalData?.data?.market_cap_percentage?.eth ?? null;
+        const totalCap = globalData?.data?.total_market_cap?.usd ?? null;
+
+        const fear = fearGreedData?.data?.[0]?.value ?? "N/A";
+        const fearText = fearGreedData?.data?.[0]?.value_classification ?? "N/A";
+
+        heroPriceBox.textContent = fmtUsd(price, 8);
+
+        mainBox.innerHTML = `
+          <div class="metrics">
+            <div class="metric">
+              <span class="metric-label">Price</span>
+              <span class="metric-value accent-cyan">${fmtUsd(price, 8)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Market Cap</span>
+              <span class="metric-value">${fmtUsd(mcap, 0)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">FDV</span>
+              <span class="metric-value accent-gold">${fmtUsd(fdv, 0)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">TVL</span>
+              <span class="metric-value accent-green">${fmtUsd(tvl, 0)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">MCAP / TVL</span>
+              <span class="metric-value">${mcapTvl !== null ? fmtNumber(mcapTvl, 2) : "N/A"}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">FDV / TVL</span>
+              <span class="metric-value">${fdvTvl !== null ? fmtNumber(fdvTvl, 2) : "N/A"}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Circulating Supply</span>
+              <span class="metric-value accent-pink">${fmtNumber(circulatingSupply, 0)}</span>
+            </div>
+          </div>
+        `;
+
+        let comparisonRows = "";
+        let bagRows = "";
+
+        for (const coin of uniqueCompare) {
+          const target = byId[coin.id];
+
+          if (!target || !target.market_cap || !circulatingSupply || !price || !mcap) {
+            comparisonRows += `
+              <tr>
+                <td><span class="asset-tag">${coin.label}</span></td>
+                <td>N/A</td>
+                <td>N/A</td>
+                <td>N/A</td>
+              </tr>
+            `;
+
+            bagRows += `
+              <tr>
+                <td><span class="asset-tag">${coin.label}</span></td>
+                <td>N/A</td>
+                <td>N/A</td>
+              </tr>
+            `;
+            continue;
+          }
+
+          const targetMcap = target.market_cap;
+          const hypotheticalPrice = targetMcap / circulatingSupply;
+          const relativeMcapPercent = (mcap / targetMcap) * 100;
+          const bagValue = bagAmount * hypotheticalPrice;
+
+          comparisonRows += `
+            <tr>
+              <td><span class="asset-tag">${coin.label}</span></td>
+              <td>${fmtUsd(targetMcap, 0)}</td>
+              <td>${fmtUsdFixed(hypotheticalPrice, 6)}</td>
+              <td>${fmtNumber(relativeMcapPercent, 2)}%</td>
+            </tr>
+          `;
+
+          bagRows += `
+            <tr>
+              <td><span class="asset-tag">${coin.label}</span></td>
+              <td>${fmtUsdFixed(hypotheticalPrice, 6)}</td>
+              <td>${fmtUsd(bagValue, 0)}</td>
+            </tr>
+          `;
+        }
+
+        comparisonBox.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Target Market Cap</th>
+                  <th>${symbolLabel} Price at Same MCAP</th>
+                  <th>${symbolLabel} MCAP vs Asset</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${comparisonRows}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        bagBox.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Simulated ${symbolLabel} Price</th>
+                  <th>1,000,000 ${symbolLabel} Bag Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${bagRows}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        const valuation =
+          mcapTvl === null ? "N/A" :
+          mcapTvl < 0.3 ? "Undervalued 🟢" :
+          mcapTvl <= 1 ? "Fair Value 🟡" :
+          "Overvalued 🔴";
+
+        const perfToken7d = perfById[tokenId]?.price_change_percentage_7d_in_currency ?? null;
+
+        marketContextBox.innerHTML = `
+          <div class="metrics">
+            <div class="metric">
+              <span class="metric-label">BTC Dominance</span>
+              <span class="metric-value accent-cyan">${fmtPct(btcDom)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">ETH Dominance</span>
+              <span class="metric-value">${fmtPct(ethDom)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Market Cap</span>
+              <span class="metric-value accent-gold">${formatMarketCap(totalCap)}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Fear & Greed</span>
+              <span class="metric-value">${fear} (${fearText})</span>
+            </div>
+          </div>
+
+          <br>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Asset</th><th>7D Performance</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><span class="asset-tag">${symbolLabel}</span></td><td>${fmtPct(perfToken7d)}</td></tr>
+                <tr><td><span class="asset-tag">BTC</span></td><td>${fmtPct(perfById["bitcoin"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
+                <tr><td><span class="asset-tag">ETH</span></td><td>${fmtPct(perfById["ethereum"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
+                <tr><td><span class="asset-tag">LINK</span></td><td>${fmtPct(perfById["chainlink"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <br>
+
+          <div class="metric">
+            <span class="metric-label">Valuation Zone</span>
+            <span class="metric-value">${valuation}</span>
+          </div>
+        `;
+
+        renderChart(tokenId, symbolLabel);
+        updateUrlToken(tokenId);
+        setStatus(`Loaded ${symbolLabel}.`, "success");
+      } catch (e) {
+        console.error(e);
+        heroPriceBox.textContent = "Error";
+        mainBox.innerHTML = "Error loading data";
+        comparisonBox.innerHTML = "Error loading comparisons";
+        bagBox.innerHTML = "Error loading bag simulations";
+        marketContextBox.innerHTML = "Error loading market context";
+        destroyTradingViewWidget();
+        document.getElementById("tv-chart").innerHTML = `
+          <div class="chart-placeholder">
+            Chart unavailable.
+          </div>
+        `;
+        setStatus(e.message || "Something went wrong.", "error");
+      }
+    }
+
+    async function analyzeToken() {
+      const input = document.getElementById("token-input").value;
+      try {
+        const tokenId = await resolveTokenId(input);
+        await loadData(tokenId);
+      } catch (e) {
+        setStatus(e.message || "Unable to analyze token.", "error");
+      }
+    }
+
+    document.getElementById("analyze-button").addEventListener("click", analyzeToken);
+
+    document.getElementById("token-input").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        analyzeToken();
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      const initialInput = getInitialTokenInput();
+      document.getElementById("token-input").value = initialInput;
+
+      try {
+        const tokenId = await resolveTokenId(initialInput);
+        await loadData(tokenId);
+      } catch (e) {
+        setStatus("Default token failed to load. Falling back to RIZE.", "error");
+        await loadData("rize");
+      }
+    });
+  </script>
 </body>
 </html>
