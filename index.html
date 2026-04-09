@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>RIZE Data Hub</title>
+  <title>Monitor The Situation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -21,9 +21,7 @@
       --shadow: 0 0 30px rgba(0, 0, 0, 0.35);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -43,14 +41,13 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          rgba(255,255,255,0.02) 0px,
-          rgba(255,255,255,0.02) 1px,
-          transparent 2px,
-          transparent 4px
-        );
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.02) 0px,
+        rgba(255,255,255,0.02) 1px,
+        transparent 2px,
+        transparent 4px
+      );
       opacity: 0.18;
       mix-blend-mode: soft-light;
     }
@@ -62,6 +59,142 @@
       z-index: 1;
     }
 
+    /* ── SEARCH BAR ── */
+    .search-section {
+      margin-bottom: 28px;
+      padding: 24px 28px;
+      border: 1px solid var(--border-strong);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .search-label {
+      display: block;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(5, 14, 34, 0.8);
+      border: 1px solid rgba(126, 224, 255, 0.28);
+      color: var(--text);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #search-input:focus {
+      border-color: var(--cyan);
+    }
+
+    #search-input::placeholder {
+      color: rgba(182, 193, 216, 0.5);
+    }
+
+    .autocomplete-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      background: #0a1836;
+      border: 1px solid rgba(126, 224, 255, 0.28);
+      border-top: none;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .autocomplete-list.open { display: block; }
+
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 15px;
+      transition: background 0.15s;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.selected {
+      background: rgba(126, 224, 255, 0.08);
+    }
+
+    .autocomplete-item img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+    }
+
+    .autocomplete-symbol {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.6px;
+      min-width: 60px;
+    }
+
+    .autocomplete-name {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #monitor-btn {
+      padding: 13px 28px;
+      background: rgba(126, 224, 255, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: "Trebuchet MS", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+
+    #monitor-btn:hover {
+      background: rgba(126, 224, 255, 0.22);
+      color: white;
+    }
+
+    #monitor-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #search-error {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--pink);
+      display: none;
+    }
+
+    /* ── HERO ── */
     .hero {
       position: relative;
       overflow: hidden;
@@ -104,7 +237,7 @@
       margin: 0;
       font-family: "Helvetica Neue", Arial, sans-serif;
       font-weight: 800;
-      font-size: clamp(42px, 5.5vw, 72px);
+      font-size: clamp(32px, 4.5vw, 64px);
       line-height: 1.05;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -159,60 +292,7 @@
       color: var(--cyan);
     }
 
-    .search-wrap {
-      margin-top: 22px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .search-input {
-      min-width: 280px;
-      flex: 0 1 340px;
-      padding: 14px 16px;
-      border: 1px solid rgba(126, 224, 255, 0.22);
-      background: rgba(5, 14, 34, 0.7);
-      color: white;
-      outline: none;
-      font-size: 16px;
-    }
-
-    .search-input::placeholder {
-      color: rgba(182, 193, 216, 0.75);
-    }
-
-    .search-button {
-      padding: 14px 18px;
-      border: 1px solid rgba(126, 224, 255, 0.22);
-      background: rgba(126, 224, 255, 0.1);
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-
-    .search-button:hover {
-      background: rgba(126, 224, 255, 0.16);
-    }
-
-    .status-line {
-      margin-top: 12px;
-      font-size: 14px;
-      color: var(--muted);
-      min-height: 20px;
-    }
-
-    .status-line.error {
-      color: #ff9b9b;
-    }
-
-    .status-line.success {
-      color: var(--green);
-    }
-
+    /* ── SECTIONS ── */
     .section {
       margin-bottom: 28px;
       padding: 26px;
@@ -275,21 +355,10 @@
       word-break: break-word;
     }
 
-    .metric-value.accent-cyan {
-      color: var(--cyan);
-    }
-
-    .metric-value.accent-gold {
-      color: var(--gold);
-    }
-
-    .metric-value.accent-green {
-      color: var(--green);
-    }
-
-    .metric-value.accent-pink {
-      color: var(--pink);
-    }
+    .metric-value.accent-cyan  { color: var(--cyan); }
+    .metric-value.accent-gold  { color: var(--gold); }
+    .metric-value.accent-green { color: var(--green); }
+    .metric-value.accent-pink  { color: var(--pink); }
 
     .table-wrap {
       overflow-x: auto;
@@ -300,7 +369,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 840px;
+      min-width: 640px;
     }
 
     th, td {
@@ -321,14 +390,8 @@
       z-index: 1;
     }
 
-    td {
-      color: white;
-      font-size: 17px;
-    }
-
-    tbody tr:hover td {
-      background: rgba(126, 224, 255, 0.03);
-    }
+    td { color: white; font-size: 17px; }
+    tbody tr:hover td { background: rgba(126, 224, 255, 0.03); }
 
     .asset-tag {
       display: inline-block;
@@ -346,625 +409,601 @@
       line-height: 1.45;
     }
 
+    /* ── TV chart placeholder ── */
     .chart-placeholder {
-      padding: 28px;
-      border: 1px dashed rgba(255,255,255,0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      border: 1px dashed rgba(126, 224, 255, 0.2);
       color: var(--muted);
-      text-align: center;
-      background: rgba(255,255,255,0.02);
+      font-size: 15px;
+      letter-spacing: 0.5px;
     }
 
+    /* ── Loading spinner ── */
+    .loading-text {
+      color: var(--muted);
+      font-size: 15px;
+      letter-spacing: 0.6px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Error box ── */
+    .error-box {
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 138, 216, 0.3);
+      background: rgba(255, 138, 216, 0.06);
+      color: var(--pink);
+      font-size: 15px;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 1100px) {
-      .metrics {
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
-      }
-
-      .hero-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-right {
-        justify-content: flex-start;
-      }
+      .metrics { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-right { justify-content: flex-start; }
     }
 
     @media (max-width: 700px) {
-      body {
-        padding: 16px;
-      }
-
-      .hero,
-      .section {
-        padding: 18px;
-      }
-
-      .section-title {
-        font-size: 28px;
-      }
-
-      .metrics {
-        grid-template-columns: 1fr;
-      }
-
-      .metric-value {
-        font-size: 26px;
-      }
-
-      td {
-        font-size: 15px;
-      }
-
-      .search-input {
-        min-width: 100%;
-      }
-
-      .search-button {
-        width: 100%;
-      }
+      body { padding: 16px; }
+      .hero, .section, .search-section { padding: 18px; }
+      .section-title { font-size: 28px; }
+      .metrics { grid-template-columns: 1fr; }
+      .metric-value { font-size: 26px; }
+      td { font-size: 15px; }
+      h1 { font-size: clamp(28px, 8vw, 48px); }
     }
   </style>
 </head>
 <body class="scanlines">
   <div class="wrap">
+
+    <!-- ── SEARCH ── -->
+    <div class="search-section">
+      <span class="search-label">Select a cryptocurrency to monitor</span>
+      <div class="search-row">
+        <div class="search-wrap">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search by name or symbol — e.g. Bitcoin, RIZE, ETH…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="autocomplete-list" id="autocomplete-list"></div>
+        </div>
+        <button id="monitor-btn" disabled>▶ Monitor</button>
+      </div>
+      <div id="search-error"></div>
+    </div>
+
+    <!-- ── HERO ── -->
     <section class="hero">
-      <div class="eyebrow" id="hero-eyebrow">RIZE Market Monitor</div>
+      <div class="eyebrow" id="hero-eyebrow">Market Monitor</div>
       <div class="hero-grid">
         <div>
-          <h1>MONITOR THE RIZE SITUATION</h1>
-          <div class="hero-sub">
-            Real-time market data, token-to-market-cap scenario analysis, and bag projections
-            against selected crypto assets — in one retro terminal.
+          <h1 id="hero-title">MONITOR THE SITUATION</h1>
+          <div class="hero-sub" id="hero-sub">
+            Search for a cryptocurrency above and click Monitor to load real-time market data, scenario analysis, and bag projections.
           </div>
-
-          <div class="search-wrap">
-            <input
-              id="token-input"
-              class="search-input"
-              type="text"
-              placeholder="Enter a token (e.g. rize, btc, ethereum, link)"
-              autocomplete="off"
-            />
-            <button id="analyze-button" class="search-button" type="button">Analyze</button>
-          </div>
-
-          <div id="search-status" class="status-line"></div>
         </div>
-
         <div class="hero-right">
           <div class="live-box">
-            <div class="live-label">Live Token Price</div>
-            <div class="live-value" id="hero-price">Loading...</div>
+            <div class="live-label" id="hero-price-label">Live Price</div>
+            <div class="live-value" id="hero-price">—</div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <h2 class="section-title" id="chart-title">RIZE / USD Chart</h2>
-      <p class="section-sub" id="chart-sub">
-        Live TradingView chart embedded directly into the dashboard.
-      </p>
-      <div id="tv-chart" style="height: 600px;"></div>
+    <!-- ── TV CHART ── -->
+    <section class="section" id="chart-section" style="display:none">
+      <h2 class="section-title" id="chart-title">Chart</h2>
+      <p class="section-sub" id="chart-sub">Live TradingView chart.</p>
+      <div id="tv-chart" style="height: 520px;"></div>
     </section>
 
+    <!-- ── CORE METRICS ── -->
     <section class="section">
-      <h2 class="section-title" id="core-title">Core Metrics</h2>
-      <p class="section-sub" id="core-sub">
-        Live snapshot of token valuation metrics using CoinGecko market data and TVL.
-      </p>
-      <div id="main-data">Loading main data...</div>
+      <h2 class="section-title" id="metrics-title">Core Metrics</h2>
+      <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
+      <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     </section>
 
+    <!-- ── COMPARISON ── -->
     <section class="section">
-      <h2 class="section-title" id="comparison-title">Price Comparison vs Other Crypto Market Caps</h2>
-      <p class="section-sub" id="comparison-sub">
-        Hypothetical token price if its market cap matched each asset’s current market cap.
-      </p>
-      <div id="comparisons">Loading comparisons...</div>
+      <h2 class="section-title" id="comp-title">Price Comparison vs Other Crypto Market Caps</h2>
+      <p class="section-sub" id="comp-sub">Hypothetical price if this token's market cap matched each asset's current market cap.</p>
+      <div id="comparisons"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     </section>
 
+    <!-- ── BAG ── -->
     <section class="section">
       <h2 class="section-title" id="bag-title">1,000,000 Token Bag Value Simulation</h2>
-      <p class="section-sub" id="bag-sub">
-        Hypothetical dollar value of a 1,000,000 token bag if the selected asset reached each simulated target price above.
-      </p>
-      <div id="bag-simulations">Loading bag simulations...</div>
-      <div class="footer-note">
-        Formula used: 1,000,000 tokens × hypothetical token price at same market cap.
-      </div>
+      <p class="section-sub" id="bag-sub">Hypothetical dollar value of a 1,000,000 token bag at each simulated target price.</p>
+      <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+      <div class="footer-note" id="bag-formula">Formula: 1,000,000 tokens × hypothetical price at same market cap.</div>
     </section>
 
+    <!-- ── MARKET CONTEXT ── -->
     <section class="section">
       <h2 class="section-title">Market Context</h2>
-      <p class="section-sub">
-        Broader market positioning, relative performance, and valuation signal.
-      </p>
-      <div id="market-context">Loading market context...</div>
+      <p class="section-sub">Broader market positioning, relative performance, and valuation signal.</p>
+      <div id="market-context"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     </section>
-  </div>
+
+  </div><!-- .wrap -->
 
   <script src="https://s3.tradingview.com/tv.js"></script>
   <script>
-    let currentTvWidget = null;
+  // ─────────────────────────────────────────────
+  //  TradingView symbol mapping (known tokens)
+  // ─────────────────────────────────────────────
+  const TV_SYMBOLS = {
+    "bitcoin":        "COINBASE:BTCUSD",
+    "ethereum":       "COINBASE:ETHUSD",
+    "ripple":         "COINBASE:XRPUSD",
+    "solana":         "COINBASE:SOLUSD",
+    "cardano":        "COINBASE:ADAUSD",
+    "dogecoin":       "COINBASE:DOGEUSD",
+    "shiba-inu":      "BINANCE:SHIBUSD",
+    "chainlink":      "COINBASE:LINKUSD",
+    "polkadot":       "COINBASE:DOTUSD",
+    "avalanche-2":    "COINBASE:AVAXUSD",
+    "uniswap":        "COINBASE:UNIUSD",
+    "litecoin":       "COINBASE:LTCUSD",
+    "stellar":        "COINBASE:XLMUSD",
+    "tron":           "BINANCE:TRXUSDT",
+    "ethereum-classic": "COINBASE:ETCUSD",
+    "monero":         "KRAKEN:XMRUSD",
+    "cosmos":         "COINBASE:ATOMUSD",
+    "near":           "COINBASE:NEARUSD",
+    "injective-protocol": "BINANCE:INJUSDT",
+    "aptos":          "COINBASE:APTUSD",
+    "sui":            "COINBASE:SUIUSD",
+    "bonk":           "COINBASE:BONKUSD",
+    "pepe":           "BINANCE:PEPEUSDT",
+    "floki":          "BINANCE:FLOKIUSDT",
+    "quant-network":  "BINANCE:QNTUSDT",
+    "decentraland":   "COINBASE:MANAUSD",
+    "theta-token":    "BINANCE:THETAUSDT",
+    "zksync":         "BINANCE:ZKUSDT",
+    "mantra":         "BINANCE:OMUSDT",
+    "rize":           "KRAKEN:RIZEUSD",
+  };
 
-    const compareCoins = [
-      { label: "LINK", id: "chainlink" },
-      { label: "CC", id: "canton-network" },
-      { label: "SHIB", id: "shiba-inu" },
-      { label: "QNT", id: "quant-network" },
-      { label: "BONK", id: "bonk" },
-      { label: "PENGU", id: "pudgy-penguins" },
-      { label: "MANA", id: "decentraland" },
-      { label: "THETA", id: "theta-token" },
-      { label: "ZK", id: "zksync" },
-      { label: "MANTRA", id: "mantra" }
-    ];
+  // ─────────────────────────────────────────────
+  //  State
+  // ─────────────────────────────────────────────
+  let selectedCoin = null;   // { id, name, symbol, thumb }
+  let debounceTimer  = null;
+  let tvWidget       = null;
+  let searchResults  = [];
+  let highlightIndex = -1;
 
-    const tokenAliases = {
-      rize: "rize",
-      btc: "bitcoin",
-      bitcoin: "bitcoin",
-      eth: "ethereum",
-      ethereum: "ethereum",
-      sol: "solana",
-      solana: "solana",
-      link: "chainlink",
-      chainlink: "chainlink",
-      qnt: "quant-network",
-      quant: "quant-network",
-      shib: "shiba-inu",
-      bonk: "bonk",
-      mana: "decentraland",
-      theta: "theta-token",
-      zk: "zksync",
-      om: "mantra",
-      mantra: "mantra",
-      cc: "canton-network",
-      canton: "canton-network"
-    };
+  const searchInput     = document.getElementById("search-input");
+  const autocompleteList = document.getElementById("autocomplete-list");
+  const monitorBtn      = document.getElementById("monitor-btn");
+  const searchError     = document.getElementById("search-error");
 
-    const chartSymbolMap = {
-      rize: "KRAKEN:RIZEUSD",
-      bitcoin: "BINANCE:BTCUSDT",
-      ethereum: "BINANCE:ETHUSDT",
-      solana: "BINANCE:SOLUSDT",
-      chainlink: "BINANCE:LINKUSDT",
-      "quant-network": "COINBASE:QNTUSD",
-      "shiba-inu": "BINANCE:SHIBUSDT",
-      bonk: "BINANCE:BONKUSDT",
-      decentraland: "BINANCE:MANAUSDT",
-      "theta-token": "BINANCE:THETAUSDT",
-      zksync: "BINANCE:ZKUSDT",
-      mantra: "BINANCE:OMUSDT",
-      "canton-network": "COINBASE:BTCUSD"
-    };
-
-    function fmtUsd(v, digits = 2) {
-      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
-      return "$" + Number(v).toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: digits
-      });
+  // ─────────────────────────────────────────────
+  //  Autocomplete
+  // ─────────────────────────────────────────────
+  searchInput.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 2) {
+      closeDropdown();
+      return;
     }
+    debounceTimer = setTimeout(() => fetchSuggestions(q), 320);
+  });
 
-    function fmtUsdFixed(v, digits = 2) {
-      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
-      return "$" + Number(v).toLocaleString(undefined, {
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits
-      });
-    }
-
-    function fmtPct(v) {
-      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
-      return Number(v).toFixed(2) + "%";
-    }
-
-    function fmtNumber(v, digits = 2) {
-      if (v === null || v === undefined || Number.isNaN(v)) return "N/A";
-      return Number(v).toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: digits
-      });
-    }
-
-    function formatMarketCap(value) {
-      if (!value) return "N/A";
-      if (value >= 1e12) return (value / 1e12).toFixed(2) + "T";
-      if (value >= 1e9) return (value / 1e9).toFixed(2) + "B";
-      return "$" + Number(value).toLocaleString();
-    }
-
-    function setStatus(message = "", type = "") {
-      const el = document.getElementById("search-status");
-      el.textContent = message;
-      el.className = "status-line" + (type ? " " + type : "");
-    }
-
-    function normalizeInput(value) {
-      return (value || "").trim().toLowerCase();
-    }
-
-    function updateUrlToken(tokenId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("token", tokenId);
-      window.history.replaceState({}, "", url);
-    }
-
-    function getInitialTokenInput() {
-      const url = new URL(window.location.href);
-      return normalizeInput(url.searchParams.get("token")) || "rize";
-    }
-
-    async function resolveTokenId(rawInput) {
-      const input = normalizeInput(rawInput);
-      if (!input) throw new Error("Please enter a token.");
-
-      if (tokenAliases[input]) {
-        return tokenAliases[input];
+  searchInput.addEventListener("keydown", e => {
+    const items = autocompleteList.querySelectorAll(".autocomplete-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      highlightIndex = Math.min(highlightIndex + 1, items.length - 1);
+      renderHighlight(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      highlightIndex = Math.max(highlightIndex - 1, 0);
+      renderHighlight(items);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightIndex >= 0 && searchResults[highlightIndex]) {
+        selectCoin(searchResults[highlightIndex]);
+      } else if (selectedCoin) {
+        triggerMonitor();
       }
+    } else if (e.key === "Escape") {
+      closeDropdown();
+    }
+  });
 
-      const res = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(input)}`);
-      if (!res.ok) throw new Error("Unable to search token right now.");
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".search-wrap")) closeDropdown();
+  });
 
+  async function fetchSuggestions(q) {
+    try {
+      const res  = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(q)}`);
       const data = await res.json();
-      const coins = data?.coins || [];
-      if (!coins.length) throw new Error("Token not found.");
-
-      const exact =
-        coins.find(c => normalizeInput(c.id) === input) ||
-        coins.find(c => normalizeInput(c.symbol) === input) ||
-        coins.find(c => normalizeInput(c.name) === input);
-
-      return (exact || coins[0]).id;
+      searchResults  = (data.coins || []).slice(0, 8);
+      highlightIndex = -1;
+      renderDropdown(searchResults);
+    } catch (err) {
+      closeDropdown();
     }
+  }
 
-    function destroyTradingViewWidget() {
-      const container = document.getElementById("tv-chart");
-      container.innerHTML = "";
-      currentTvWidget = null;
-    }
-
-    function renderChart(tokenId, symbolLabel) {
-      const container = document.getElementById("tv-chart");
-      const title = document.getElementById("chart-title");
-      const sub = document.getElementById("chart-sub");
-
-      title.textContent = `${symbolLabel} Chart`;
-
-      const tvSymbol = chartSymbolMap[tokenId];
-      destroyTradingViewWidget();
-
-      if (!tvSymbol || typeof TradingView === "undefined") {
-        sub.textContent = "TradingView chart is currently unavailable for this asset in V1.";
-        container.innerHTML = `
-          <div class="chart-placeholder">
-            TradingView chart mapping is not available yet for ${symbolLabel}.
-          </div>
-        `;
-        return;
-      }
-
-      sub.textContent = "Live TradingView chart embedded directly into the dashboard.";
-
-      currentTvWidget = new TradingView.widget({
-        container_id: "tv-chart",
-        width: "100%",
-        height: 600,
-        symbol: tvSymbol,
-        interval: "60",
-        timezone: "Etc/UTC",
-        theme: "dark",
-        style: "1",
-        locale: "en",
-        toolbar_bg: "#061128",
-        enable_publishing: false,
-        hide_top_toolbar: false,
-        hide_legend: false,
-        save_image: false
-      });
-    }
-
-    async function loadData(tokenId = "rize") {
-      const mainBox = document.getElementById("main-data");
-      const comparisonBox = document.getElementById("comparisons");
-      const bagBox = document.getElementById("bag-simulations");
-      const heroPriceBox = document.getElementById("hero-price");
-      const marketContextBox = document.getElementById("market-context");
-      const tokenInput = document.getElementById("token-input");
-      const heroEyebrow = document.getElementById("hero-eyebrow");
-      const coreSub = document.getElementById("core-sub");
-      const comparisonSub = document.getElementById("comparison-sub");
-      const bagSub = document.getElementById("bag-sub");
-
-      const bagAmount = 1000000;
-
-      setStatus("Loading token data...");
-      heroPriceBox.textContent = "Loading...";
-      mainBox.innerHTML = "Loading main data...";
-      comparisonBox.innerHTML = "Loading comparisons...";
-      bagBox.innerHTML = "Loading bag simulations...";
-      marketContextBox.innerHTML = "Loading market context...";
-
-      const uniqueCompare = compareCoins.filter(c => c.id !== tokenId);
-      const allIds = [tokenId, ...uniqueCompare.map(c => c.id)].join(",");
-      const perfIds = [tokenId, "bitcoin", "ethereum", "chainlink"]
-        .filter((v, i, arr) => arr.indexOf(v) === i)
-        .join(",");
-
-      try {
-        const [marketsRes, tokenDetailRes, globalRes, fearGreedRes, perfRes] = await Promise.all([
-          fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${allIds}`),
-          fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(tokenId)}`),
-          fetch("https://api.coingecko.com/api/v3/global"),
-          fetch("https://api.alternative.me/fng/?limit=1"),
-          fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${perfIds}&price_change_percentage=7d`)
-        ]);
-
-        if (!marketsRes.ok || !tokenDetailRes.ok || !globalRes.ok || !fearGreedRes.ok || !perfRes.ok) {
-          throw new Error("One or more API calls failed.");
-        }
-
-        const markets = await marketsRes.json();
-        const tokenDetail = await tokenDetailRes.json();
-        const globalData = await globalRes.json();
-        const fearGreedData = await fearGreedRes.json();
-        const perfData = await perfRes.json();
-
-        const byId = Object.fromEntries(markets.map(c => [c.id, c]));
-        const perfById = Object.fromEntries(perfData.map(c => [c.id, c]));
-        const currentToken = byId[tokenId];
-
-        if (!currentToken) {
-          throw new Error("Selected token data is unavailable.");
-        }
-
-        const symbolLabel = (currentToken.symbol || tokenId).toUpperCase();
-
-        tokenInput.value = tokenId;
-        heroEyebrow.textContent = `${symbolLabel} Market Monitor`;
-        document.title = `${symbolLabel} Data Hub | Monitor The Situation`;
-        coreSub.textContent = `Live snapshot of ${symbolLabel} valuation metrics using CoinGecko market data and TVL.`;
-        comparisonSub.textContent = `Hypothetical ${symbolLabel} price if its market cap matched each asset’s current market cap.`;
-        bagSub.textContent = `Hypothetical dollar value of a 1,000,000 ${symbolLabel} bag if it reached each simulated target price above.`;
-
-        const price = currentToken.current_price ?? null;
-        const mcap = currentToken.market_cap ?? null;
-        const fdv = currentToken.fully_diluted_valuation ?? null;
-        const circulatingSupply = currentToken.circulating_supply ?? null;
-        const tvl = tokenDetail?.market_data?.total_value_locked?.usd ?? null;
-
-        const mcapTvl = (mcap && tvl) ? (mcap / tvl) : null;
-        const fdvTvl = (fdv && tvl) ? (fdv / tvl) : null;
-
-        const btcDom = globalData?.data?.market_cap_percentage?.btc ?? null;
-        const ethDom = globalData?.data?.market_cap_percentage?.eth ?? null;
-        const totalCap = globalData?.data?.total_market_cap?.usd ?? null;
-
-        const fear = fearGreedData?.data?.[0]?.value ?? "N/A";
-        const fearText = fearGreedData?.data?.[0]?.value_classification ?? "N/A";
-
-        heroPriceBox.textContent = fmtUsd(price, 8);
-
-        mainBox.innerHTML = `
-          <div class="metrics">
-            <div class="metric">
-              <span class="metric-label">Price</span>
-              <span class="metric-value accent-cyan">${fmtUsd(price, 8)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Market Cap</span>
-              <span class="metric-value">${fmtUsd(mcap, 0)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">FDV</span>
-              <span class="metric-value accent-gold">${fmtUsd(fdv, 0)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">TVL</span>
-              <span class="metric-value accent-green">${fmtUsd(tvl, 0)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">MCAP / TVL</span>
-              <span class="metric-value">${mcapTvl !== null ? fmtNumber(mcapTvl, 2) : "N/A"}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">FDV / TVL</span>
-              <span class="metric-value">${fdvTvl !== null ? fmtNumber(fdvTvl, 2) : "N/A"}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Circulating Supply</span>
-              <span class="metric-value accent-pink">${fmtNumber(circulatingSupply, 0)}</span>
-            </div>
-          </div>
-        `;
-
-        let comparisonRows = "";
-        let bagRows = "";
-
-        for (const coin of uniqueCompare) {
-          const target = byId[coin.id];
-
-          if (!target || !target.market_cap || !circulatingSupply || !price || !mcap) {
-            comparisonRows += `
-              <tr>
-                <td><span class="asset-tag">${coin.label}</span></td>
-                <td>N/A</td>
-                <td>N/A</td>
-                <td>N/A</td>
-              </tr>
-            `;
-
-            bagRows += `
-              <tr>
-                <td><span class="asset-tag">${coin.label}</span></td>
-                <td>N/A</td>
-                <td>N/A</td>
-              </tr>
-            `;
-            continue;
-          }
-
-          const targetMcap = target.market_cap;
-          const hypotheticalPrice = targetMcap / circulatingSupply;
-          const relativeMcapPercent = (mcap / targetMcap) * 100;
-          const bagValue = bagAmount * hypotheticalPrice;
-
-          comparisonRows += `
-            <tr>
-              <td><span class="asset-tag">${coin.label}</span></td>
-              <td>${fmtUsd(targetMcap, 0)}</td>
-              <td>${fmtUsdFixed(hypotheticalPrice, 6)}</td>
-              <td>${fmtNumber(relativeMcapPercent, 2)}%</td>
-            </tr>
-          `;
-
-          bagRows += `
-            <tr>
-              <td><span class="asset-tag">${coin.label}</span></td>
-              <td>${fmtUsdFixed(hypotheticalPrice, 6)}</td>
-              <td>${fmtUsd(bagValue, 0)}</td>
-            </tr>
-          `;
-        }
-
-        comparisonBox.innerHTML = `
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Asset</th>
-                  <th>Target Market Cap</th>
-                  <th>${symbolLabel} Price at Same MCAP</th>
-                  <th>${symbolLabel} MCAP vs Asset</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${comparisonRows}
-              </tbody>
-            </table>
-          </div>
-        `;
-
-        bagBox.innerHTML = `
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Asset</th>
-                  <th>Simulated ${symbolLabel} Price</th>
-                  <th>1,000,000 ${symbolLabel} Bag Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${bagRows}
-              </tbody>
-            </table>
-          </div>
-        `;
-
-        const valuation =
-          mcapTvl === null ? "N/A" :
-          mcapTvl < 0.3 ? "Undervalued 🟢" :
-          mcapTvl <= 1 ? "Fair Value 🟡" :
-          "Overvalued 🔴";
-
-        const perfToken7d = perfById[tokenId]?.price_change_percentage_7d_in_currency ?? null;
-
-        marketContextBox.innerHTML = `
-          <div class="metrics">
-            <div class="metric">
-              <span class="metric-label">BTC Dominance</span>
-              <span class="metric-value accent-cyan">${fmtPct(btcDom)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">ETH Dominance</span>
-              <span class="metric-value">${fmtPct(ethDom)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Total Market Cap</span>
-              <span class="metric-value accent-gold">${formatMarketCap(totalCap)}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Fear & Greed</span>
-              <span class="metric-value">${fear} (${fearText})</span>
-            </div>
-          </div>
-
-          <br>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Asset</th><th>7D Performance</th></tr>
-              </thead>
-              <tbody>
-                <tr><td><span class="asset-tag">${symbolLabel}</span></td><td>${fmtPct(perfToken7d)}</td></tr>
-                <tr><td><span class="asset-tag">BTC</span></td><td>${fmtPct(perfById["bitcoin"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
-                <tr><td><span class="asset-tag">ETH</span></td><td>${fmtPct(perfById["ethereum"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
-                <tr><td><span class="asset-tag">LINK</span></td><td>${fmtPct(perfById["chainlink"]?.price_change_percentage_7d_in_currency ?? null)}</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <br>
-
-          <div class="metric">
-            <span class="metric-label">Valuation Zone</span>
-            <span class="metric-value">${valuation}</span>
-          </div>
-        `;
-
-        renderChart(tokenId, symbolLabel);
-        updateUrlToken(tokenId);
-        setStatus(`Loaded ${symbolLabel}.`, "success");
-      } catch (e) {
-        console.error(e);
-        heroPriceBox.textContent = "Error";
-        mainBox.innerHTML = "Error loading data";
-        comparisonBox.innerHTML = "Error loading comparisons";
-        bagBox.innerHTML = "Error loading bag simulations";
-        marketContextBox.innerHTML = "Error loading market context";
-        destroyTradingViewWidget();
-        document.getElementById("tv-chart").innerHTML = `
-          <div class="chart-placeholder">
-            Chart unavailable.
-          </div>
-        `;
-        setStatus(e.message || "Something went wrong.", "error");
-      }
-    }
-
-    async function analyzeToken() {
-      const input = document.getElementById("token-input").value;
-      try {
-        const tokenId = await resolveTokenId(input);
-        await loadData(tokenId);
-      } catch (e) {
-        setStatus(e.message || "Unable to analyze token.", "error");
-      }
-    }
-
-    document.getElementById("analyze-button").addEventListener("click", analyzeToken);
-
-    document.getElementById("token-input").addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        analyzeToken();
-      }
+  function renderDropdown(coins) {
+    if (!coins.length) { closeDropdown(); return; }
+    autocompleteList.innerHTML = coins.map((c, i) => `
+      <div class="autocomplete-item" data-index="${i}">
+        <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
+        <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
+        <span class="autocomplete-name">${c.name}</span>
+      </div>
+    `).join("");
+    autocompleteList.querySelectorAll(".autocomplete-item").forEach((el, i) => {
+      el.addEventListener("mousedown", e => { e.preventDefault(); selectCoin(coins[i]); });
     });
+    autocompleteList.classList.add("open");
+  }
 
-    window.addEventListener("DOMContentLoaded", async () => {
-      const initialInput = getInitialTokenInput();
-      document.getElementById("token-input").value = initialInput;
+  function renderHighlight(items) {
+    items.forEach((el, i) => el.classList.toggle("selected", i === highlightIndex));
+    if (items[highlightIndex]) items[highlightIndex].scrollIntoView({ block: "nearest" });
+  }
 
+  function closeDropdown() {
+    autocompleteList.classList.remove("open");
+    autocompleteList.innerHTML = "";
+  }
+
+  function selectCoin(coin) {
+    selectedCoin = coin;
+    searchInput.value = `${coin.name} (${coin.symbol.toUpperCase()})`;
+    monitorBtn.disabled = false;
+    closeDropdown();
+    setSearchError("");
+  }
+
+  // ─────────────────────────────────────────────
+  //  Monitor button
+  // ─────────────────────────────────────────────
+  monitorBtn.addEventListener("click", triggerMonitor);
+
+  function triggerMonitor() {
+    if (!selectedCoin) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("token", selectedCoin.id);
+    window.history.pushState({}, "", url.toString());
+    loadData(selectedCoin.id, selectedCoin.name, selectedCoin.symbol);
+  }
+
+  // ─────────────────────────────────────────────
+  //  URL on load
+  // ─────────────────────────────────────────────
+  window.addEventListener("DOMContentLoaded", async () => {
+    const params  = new URLSearchParams(window.location.search);
+    const tokenId = params.get("token");
+    if (tokenId) {
+      // Resolve coin meta from CoinGecko
       try {
-        const tokenId = await resolveTokenId(initialInput);
-        await loadData(tokenId);
-      } catch (e) {
-        setStatus("Default token failed to load. Falling back to RIZE.", "error");
-        await loadData("rize");
-      }
+        const res  = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(tokenId)}`);
+        const data = await res.json();
+        const coin = (data.coins || []).find(c => c.id === tokenId) || (data.coins || [])[0];
+        if (coin) {
+          selectCoin(coin);
+          loadData(coin.id, coin.name, coin.symbol);
+        }
+      } catch (e) { /* silently ignore */ }
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  //  Helpers
+  // ─────────────────────────────────────────────
+  function fmtUsd(v) {
+    return "$" + Number(v).toLocaleString();
+  }
+
+  function fmtPct(v) {
+    const n = Number(v);
+    const color = n >= 0 ? "var(--green)" : "var(--pink)";
+    return `<span style="color:${color}">${n >= 0 ? "+" : ""}${n.toFixed(2)}%</span>`;
+  }
+
+  function formatLargeNum(value) {
+    if (!value) return "N/A";
+    if (value >= 1e12) return "$" + (value / 1e12).toFixed(2) + "T";
+    if (value >= 1e9)  return "$" + (value / 1e9).toFixed(2) + "B";
+    if (value >= 1e6)  return "$" + (value / 1e6).toFixed(2) + "M";
+    return "$" + Number(value).toLocaleString();
+  }
+
+  function setSearchError(msg) {
+    searchError.textContent = msg;
+    searchError.style.display = msg ? "block" : "none";
+  }
+
+  function setLoading() {
+    const ph = '<div class="loading-text">Loading data…</div>';
+    document.getElementById("main-data").innerHTML         = ph;
+    document.getElementById("comparisons").innerHTML       = ph;
+    document.getElementById("bag-simulations").innerHTML   = ph;
+    document.getElementById("market-context").innerHTML    = ph;
+  }
+
+  function setError(msg) {
+    const box = `<div class="error-box">⚠ ${msg}</div>`;
+    document.getElementById("main-data").innerHTML         = box;
+    document.getElementById("comparisons").innerHTML       = box;
+    document.getElementById("bag-simulations").innerHTML   = box;
+    document.getElementById("market-context").innerHTML    = box;
+  }
+
+  // ─────────────────────────────────────────────
+  //  TradingView chart
+  // ─────────────────────────────────────────────
+  function renderChart(coinId, coinName) {
+    const tvSymbol = TV_SYMBOLS[coinId] || null;
+    const section  = document.getElementById("chart-section");
+    const container = document.getElementById("tv-chart");
+
+    document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
+    document.getElementById("chart-sub").textContent   = "Live TradingView chart embedded in the dashboard.";
+
+    if (!tvSymbol) {
+      section.style.display = "block";
+      container.innerHTML = `<div class="chart-placeholder">No TradingView symbol mapping found for <strong>${coinId}</strong>. Chart unavailable.</div>`;
+      return;
+    }
+
+    section.style.display = "block";
+    container.innerHTML = "";   // clear previous widget
+
+    if (tvWidget) {
+      try { tvWidget.remove(); } catch(e) {}
+      tvWidget = null;
+    }
+
+    tvWidget = new TradingView.widget({
+      container_id: "tv-chart",
+      width:        "100%",
+      height:       520,
+      symbol:       tvSymbol,
+      interval:     "60",
+      timezone:     "Etc/UTC",
+      theme:        "dark",
+      style:        "1",
+      locale:       "en",
+      toolbar_bg:   "#061128",
+      enable_publishing: false,
+      hide_top_toolbar:  false,
+      hide_legend:       false,
+      save_image:        false,
     });
+  }
+
+  // ─────────────────────────────────────────────
+  //  Main data loader
+  // ─────────────────────────────────────────────
+  const compareCoins = [
+    { label: "BTC",    id: "bitcoin" },
+    { label: "ETH",    id: "ethereum" },
+    { label: "BNB",    id: "binancecoin" },
+    { label: "SOL",    id: "solana" },
+    { label: "LINK",   id: "chainlink" },
+    { label: "SHIB",   id: "shiba-inu" },
+    { label: "BONK",   id: "bonk" },
+    { label: "QNT",    id: "quant-network" },
+    { label: "MANA",   id: "decentraland" },
+    { label: "THETA",  id: "theta-token" },
+  ];
+
+  async function loadData(coinId, coinName, coinSymbol) {
+    const sym = coinSymbol.toUpperCase();
+
+    // Update hero labels
+    document.getElementById("hero-eyebrow").textContent    = `${sym} Market Monitor`;
+    document.getElementById("hero-title").textContent      = `MONITOR THE ${sym} SITUATION`;
+    document.getElementById("hero-sub").textContent        = `Real-time market data, ${sym}-to-market-cap scenario analysis, and bag projections against selected crypto assets — in one retro terminal.`;
+    document.getElementById("hero-price-label").textContent = `Live ${sym} Price`;
+    document.getElementById("hero-price").textContent      = "Loading…";
+    document.getElementById("metrics-title").textContent   = "Core Metrics";
+    document.getElementById("metrics-sub").textContent     = `Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
+    document.getElementById("comp-title").textContent      = `Price Comparison vs Other Crypto Market Caps`;
+    document.getElementById("comp-sub").textContent        = `Hypothetical ${sym} price if ${coinName} market cap matched each asset's current market cap.`;
+    document.getElementById("bag-title").textContent       = `1,000,000 ${sym} Bag Value Simulation`;
+    document.getElementById("bag-sub").textContent         = `Hypothetical dollar value of a 1,000,000 ${sym} bag at each simulated target price.`;
+    document.getElementById("bag-formula").textContent     = `Formula: 1,000,000 ${sym} × hypothetical price at same market cap.`;
+
+    setLoading();
+    monitorBtn.disabled = true;
+    setSearchError("");
+
+    // Render TradingView
+    renderChart(coinId, coinName);
+
+    const bagAmount   = 1_000_000;
+    const compareIds  = compareCoins.map(c => c.id).filter(id => id !== coinId);
+    const allIds      = [coinId, ...compareIds].join(",");
+
+    try {
+      const [marketsRes, detailRes, globalRes, fearGreedRes, perfRes] = await Promise.all([
+        fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${allIds}`),
+        fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`),
+        fetch("https://api.coingecko.com/api/v3/global"),
+        fetch("https://api.alternative.me/fng/?limit=1"),
+        fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId},bitcoin,ethereum,chainlink&price_change_percentage=7d`)
+      ]);
+
+      if (!marketsRes.ok) throw new Error(`CoinGecko error (${marketsRes.status})`);
+
+      const markets    = await marketsRes.json();
+      const detail     = detailRes.ok ? await detailRes.json() : null;
+      const globalData = globalRes.ok ? await globalRes.json() : null;
+      const fearGreed  = fearGreedRes.ok ? await fearGreedRes.json() : null;
+      const perfData   = perfRes.ok ? await perfRes.json() : [];
+
+      const byId     = Object.fromEntries(markets.map(c => [c.id, c]));
+      const perfById = Object.fromEntries(perfData.map(c => [c.id, c]));
+
+      const main = byId[coinId];
+      if (!main) throw new Error(`Token "${coinId}" not found in CoinGecko markets data.`);
+
+      const price  = main.current_price;
+      const mcap   = main.market_cap;
+      const fdv    = main.fully_diluted_valuation;
+      const supply = main.circulating_supply;
+
+      document.getElementById("hero-price").textContent = price ? `$${Number(price).toLocaleString()}` : "N/A";
+
+      // ── TVL (only if available in detail)
+      const tvlRaw = detail?.market_data?.total_value_locked?.usd;
+      let tvlBlock = "";
+      if (tvlRaw) {
+        const mcapTvl = mcap / tvlRaw;
+        const fdvTvl  = fdv  / tvlRaw;
+        tvlBlock = `
+          <div class="metric"><span class="metric-label">TVL</span><span class="metric-value accent-green">${formatLargeNum(tvlRaw)}</span></div>
+          <div class="metric"><span class="metric-label">MCAP / TVL</span><span class="metric-value">${mcapTvl.toFixed(2)}</span></div>
+          <div class="metric"><span class="metric-label">FDV / TVL</span><span class="metric-value">${fdvTvl.toFixed(2)}</span></div>
+        `;
+      }
+
+      document.getElementById("main-data").innerHTML = `
+        <div class="metrics">
+          <div class="metric"><span class="metric-label">Price</span><span class="metric-value accent-cyan">$${Number(price).toLocaleString()}</span></div>
+          <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${formatLargeNum(mcap)}</span></div>
+          <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${formatLargeNum(fdv)}</span></div>
+          <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${Number(supply).toLocaleString(undefined, {maximumFractionDigits: 0})}</span></div>
+          <div class="metric"><span class="metric-label">24h Change</span><span class="metric-value">${fmtPct(main.price_change_percentage_24h)}</span></div>
+          <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">${main.ath ? "$"+Number(main.ath).toLocaleString() : "N/A"}</span></div>
+          ${tvlBlock}
+        </div>
+      `;
+
+      // ── Comparison + Bag
+      let compRows = "";
+      let bagRows  = "";
+
+      for (const coin of compareCoins) {
+        if (coin.id === coinId) continue;
+        const target     = byId[coin.id];
+        if (!target) continue;
+        const targetMcap = target.market_cap;
+        if (!targetMcap || !supply) continue;
+        const priceSim   = targetMcap / supply;
+        const bag        = bagAmount * priceSim;
+        const pct        = mcap ? ((mcap / targetMcap) * 100).toFixed(2) + "%" : "N/A";
+
+        compRows += `<tr>
+          <td><span class="asset-tag">${coin.label}</span></td>
+          <td>${formatLargeNum(targetMcap)}</td>
+          <td>$${priceSim < 0.001 ? priceSim.toExponential(4) : priceSim.toLocaleString(undefined, {maximumFractionDigits: 6})}</td>
+          <td>${pct}</td>
+        </tr>`;
+
+        bagRows += `<tr>
+          <td><span class="asset-tag">${coin.label}</span></td>
+          <td>$${priceSim < 0.001 ? priceSim.toExponential(4) : priceSim.toLocaleString(undefined, {maximumFractionDigits: 6})}</td>
+          <td>${formatLargeNum(bag)}</td>
+        </tr>`;
+      }
+
+      document.getElementById("comparisons").innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr>
+            ${compRows || '<tr><td colspan="4" style="color:var(--muted)">No comparison data available.</td></tr>'}
+          </table>
+        </div>
+      `;
+
+      document.getElementById("bag-simulations").innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr>
+            ${bagRows || '<tr><td colspan="3" style="color:var(--muted)">No bag data available.</td></tr>'}
+          </table>
+        </div>
+      `;
+
+      // ── Market Context
+      let contextHtml = "";
+
+      if (globalData) {
+        const btcDom   = globalData.data.market_cap_percentage.btc;
+        const ethDom   = globalData.data.market_cap_percentage.eth;
+        const totalCap = globalData.data.total_market_cap.usd;
+        const fear     = fearGreed?.data?.[0]?.value || "N/A";
+        const fearText = fearGreed?.data?.[0]?.value_classification || "";
+
+        contextHtml += `
+          <div class="metrics">
+            <div class="metric"><span class="metric-label">BTC Dominance</span><span class="metric-value accent-cyan">${Number(btcDom).toFixed(2)}%</span></div>
+            <div class="metric"><span class="metric-label">ETH Dominance</span><span class="metric-value">${Number(ethDom).toFixed(2)}%</span></div>
+            <div class="metric"><span class="metric-label">Total Market Cap</span><span class="metric-value accent-gold">${formatLargeNum(totalCap)}</span></div>
+            <div class="metric"><span class="metric-label">Fear &amp; Greed</span><span class="metric-value">${fear} <span style="font-size:18px;font-family:inherit">(${fearText})</span></span></div>
+          </div><br>
+        `;
+      }
+
+      // 7d perf table
+      let perfRows = "";
+      const perfTokens = [
+        { id: coinId,      label: sym },
+        { id: "bitcoin",   label: "BTC" },
+        { id: "ethereum",  label: "ETH" },
+        { id: "chainlink", label: "LINK" },
+      ].filter((t, i, arr) => arr.findIndex(x => x.id === t.id) === i); // dedup if e.g. coinId=bitcoin
+
+      for (const t of perfTokens) {
+        const p = perfById[t.id];
+        if (!p) continue;
+        perfRows += `<tr><td><span class="asset-tag">${t.label}</span></td><td>${fmtPct(p.price_change_percentage_7d_in_currency)}</td></tr>`;
+      }
+
+      if (perfRows) {
+        contextHtml += `
+          <div class="table-wrap">
+            <table>
+              <tr><th>Asset</th><th>7D Performance</th></tr>
+              ${perfRows}
+            </table>
+          </div><br>
+        `;
+      }
+
+      // Valuation zone (TVL-based if available, else rank-based)
+      if (tvlRaw && mcap) {
+        const mcapTvl  = mcap / tvlRaw;
+        const valLabel = mcapTvl < 0.3 ? "Undervalued 🟢" : mcapTvl <= 1 ? "Fair Value 🟡" : "Overvalued 🔴";
+        contextHtml += `<div class="metric"><span class="metric-label">Valuation Zone (MCAP/TVL)</span><span class="metric-value">${valLabel}</span></div>`;
+      } else if (main.market_cap_rank) {
+        contextHtml += `<div class="metric"><span class="metric-label">Market Cap Rank</span><span class="metric-value accent-cyan">#${main.market_cap_rank}</span></div>`;
+      }
+
+      document.getElementById("market-context").innerHTML = contextHtml || '<div class="chart-placeholder">No context data available.</div>';
+
+    } catch (e) {
+      console.error(e);
+      setError(e.message || "Failed to load data. Check your connection or try again.");
+      document.getElementById("hero-price").textContent = "Error";
+    } finally {
+      monitorBtn.disabled = false;
+    }
+  }
   </script>
 </body>
 </html>
