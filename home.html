@@ -276,10 +276,16 @@
     @media(max-width:900px){
       .features { grid-template-columns:1fr 1fr; }
     }
+    @media(max-width:900px){
+      .support-cards { flex-direction:column; align-items:center; }
+      .support-card { width:100%; max-width:480px; }
+    }
     @media(max-width:600px){
       .features { grid-template-columns:1fr; }
       .cta-btn { font-size:18px; padding:18px 28px; }
       .cta-btn img { height:40px; }
+      .support-card { padding:36px 24px; }
+      .support-card-icon { font-size:48px; }
     }
   </style>
 </head>
