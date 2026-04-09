@@ -348,7 +348,7 @@
     th {
       position: sticky; top: 0;
       background: rgba(6,8,24,0.99);
-      color: rgba(255,255,255,0.75); font-size: 13px;
+      color: rgba(255,255,255,0.92); font-size: 15px;
       text-transform: uppercase; letter-spacing: 1.5px; z-index: 1;
       font-weight: 700;
     }
@@ -357,12 +357,21 @@
     tbody tr:hover td { background: rgba(126,224,255,0.03); }
 
     .asset-tag {
-      display: inline-block; padding: 4px 8px;
-      border: 1px solid rgba(255,255,255,0.11);
-      background: rgba(255,255,255,0.025);
+      display: inline-block; padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04);
       font-weight: 700; letter-spacing: 0.8px;
       font-size: 14px;
     }
+    .asset-tag.tag-btc  { color:#f7931a; border-color:rgba(247,147,26,0.5); background:rgba(247,147,26,0.08); }
+    .asset-tag.tag-eth  { color:#a78bfa; border-color:rgba(167,139,250,0.5); background:rgba(167,139,250,0.08); }
+    .asset-tag.tag-link { color:#2a5ada; border-color:rgba(42,90,218,0.6); background:rgba(42,90,218,0.1); }
+    .asset-tag.tag-sol  { color:#c77dff; border-color:rgba(199,125,255,0.5); background:rgba(199,125,255,0.08); }
+    .asset-tag.tag-xrp  { color:#adb5bd; border-color:rgba(173,181,189,0.4); background:rgba(173,181,189,0.06); }
+    .asset-tag.tag-extra{ color:#3DBE47; border-color:rgba(61,190,71,0.5); background:rgba(61,190,71,0.08); }
+    /* Highlight des colonnes de valeur dans les tableaux */
+    .td-price { color: var(--cyan) !important; font-weight: 700; }
+    .td-bag   { color: #3DBE47 !important; font-weight: 700; }
 
     .footer-note {
       margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.45;
@@ -895,6 +904,17 @@
   let sortComp  = {col:"mcap", dir:"desc"};
   let sortBag   = {col:"price", dir:"desc"};
 
+
+  // Couleur du tag selon l'asset
+  function assetTagClass(coinId, isExtra) {
+    if(isExtra) return "asset-tag tag-extra";
+    const map = {
+      "bitcoin":"tag-btc","ethereum":"tag-eth","chainlink":"tag-link",
+      "solana":"tag-sol","ripple":"tag-xrp"
+    };
+    return "asset-tag " + (map[coinId] || "");
+  }
+
   function renderTables() {
     const allCoins = [...compareCoins, ...extraCompareCoins]
       .filter(c => c.id !== currentCoinId && currentByIdRef[c.id]?.market_cap && currentSupply);
@@ -929,7 +949,8 @@
         ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
         : "";
       const pctStr = pct!==null ? pct.toFixed(2)+"%" : "N/A";
-      return `<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>${formatLargeNum(mcap)}</td><td>$${fmtPrice(ps)}</td><td>${pctStr}</td></tr>`;
+      const tagClass = assetTagClass(coin.id, !!coin.removable);
+      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td>${formatLargeNum(mcap)}</td><td class="td-price">$${fmtPrice(ps)}</td><td>${pctStr}</td></tr>`;
     }).join("") || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
 
     // Tri bag
@@ -948,7 +969,8 @@
       const removable = coin.removable
         ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
         : "";
-      return `<tr><td><span class="asset-tag">${coin.label}</span>${removable}</td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
+      const tagClass = assetTagClass(coin.id, !!coin.removable);
+      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td class="td-price">$${fmtPrice(ps)}</td><td class="td-bag">${formatLargeNum(bag)}</td></tr>`;
     }).join("") || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
 
     const compBody = document.getElementById("comp-table-body");
@@ -1242,5 +1264,4 @@
     <p class="footer-copy">© 2026 Monitor The Situation — Live data terminal</p>
   </footer>
 </body>
-</html>
 </html>
