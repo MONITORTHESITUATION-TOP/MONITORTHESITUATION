@@ -594,10 +594,7 @@
     document.getElementById("hero-price-label").textContent=`Live ${sym} Price`;
     document.getElementById("hero-price").textContent="Loading…";
     document.getElementById("metrics-sub").textContent=`Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
-    document.getElementById("comp-sub").textContent=`Hypothetical ${sym} price if ${coinName} market cap matched each asset's current market cap.`;
-    document.getElementById("bag-title").textContent=`1,000,000 ${sym} Bag Value Simulation`;
-    document.getElementById("bag-sub").textContent=`Hypothetical dollar value of a 1,000,000 ${sym} bag at each simulated target price.`;
-    document.getElementById("bag-formula").textContent=`Formula: 1,000,000 ${sym} × hypothetical price at same market cap.`;
+    document.getElementById("comp-sub").textContent=`Hypothetical ${sym} price if ${coinName} market cap matched each asset's — and the value of your bag at that price.`;
     setLoading(); monitorBtn.disabled=true; setSearchError(""); renderChart(coinId,coinName,sym);
 
     const compareIds=compareCoins.map(c=>c.id).filter(id=>id!==coinId);
