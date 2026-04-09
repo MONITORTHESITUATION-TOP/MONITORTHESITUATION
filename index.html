@@ -157,7 +157,27 @@
     "bonk":"COINBASE:BONKUSD","pepe":"BINANCE:PEPEUSDT","floki":"BINANCE:FLOKIUSDT",
     "quant-network":"BINANCE:QNTUSDT","decentraland":"COINBASE:MANAUSD",
     "theta-token":"BINANCE:THETAUSDT","zksync":"BINANCE:ZKUSDT","mantra":"BINANCE:OMUSDT",
-    "rize":"KRAKEN:RIZEUSD"
+    "rize":"KRAKEN:RIZEUSD",
+    // Tokens sans spot Binance fiable — mappés sur Coinbase
+    "canton-network":"COINBASE:CCUSD",
+    "fetch-ai":"COINBASE:FETUSD",
+    "pudgy-penguins":"COINBASE:PENGUUSD",
+    "render-token":"COINBASE:RENDERUSD",
+    "helium":"COINBASE:HNTUSD",
+    "immutable-x":"COINBASE:IMXUSD",
+    "axie-infinity":"BINANCE:AXSUSDT",
+    "sandbox":"COINBASE:SANDUSD",
+    "gala":"BINANCE:GALAUSDT",
+    "internet-computer":"COINBASE:ICPUSD",
+    "filecoin":"COINBASE:FILUSD",
+    "the-graph":"COINBASE:GRTUSD",
+    "optimism":"COINBASE:OPUSD",
+    "arbitrum":"COINBASE:ARBUSD",
+    "celestia":"COINBASE:TIAUSD",
+    "stacks":"COINBASE:STXUSD",
+    "sei-network":"COINBASE:SEIUSD",
+    "flow":"COINBASE:FLOWUSD",
+    "casper-network":"COINBASE:CSPRUSD",
   };
 
   // Toutes les requêtes CoinGecko passent par notre proxy Vercel
@@ -257,14 +277,15 @@
     // Mapping manuel pour les cas connus — fiable à 100%
     if (TV_SYMBOLS[coinId]) return [TV_SYMBOLS[coinId]];
     const s = coinSymbol.toUpperCase();
-    // Ordre : exchanges les plus liquides en premier
+    // Coinbase en premier : paires spot fiables, bon historique, pas de perps parasites
+    // Binance en second : très liquide mais parfois que des perps sur les small caps
     return [
-      `BINANCE:${s}USDT`,
       `COINBASE:${s}USD`,
       `KRAKEN:${s}USD`,
+      `BINANCE:${s}USDT`,
       `BYBIT:${s}USDT`,
       `OKX:${s}USDT`,
-      `BINANCE:${s}BTC`,   // fallback paire BTC pour les petits tokens
+      `BINANCE:${s}BTC`,
     ];
   }
 
