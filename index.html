@@ -370,8 +370,9 @@
     .asset-tag.tag-xrp  { color:#adb5bd; border-color:rgba(173,181,189,0.4); background:rgba(173,181,189,0.06); }
     .asset-tag.tag-extra{ color:#3DBE47; border-color:rgba(61,190,71,0.5); background:rgba(61,190,71,0.08); }
     /* Highlight des colonnes de valeur dans les tableaux */
-    .td-price { color: var(--cyan) !important; font-weight: 700; }
-    .td-bag   { color: #3DBE47 !important; font-weight: 700; }
+    .td-price      { color: #98ffb6 !important; font-weight: 700; }
+    .td-price-hyp  { color: white !important; font-weight: 700; }
+    .td-bag        { color: #98ffb6 !important; font-weight: 700; }
 
     .footer-note {
       margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.45;
@@ -970,7 +971,7 @@
         ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
         : "";
       const tagClass = assetTagClass(coin.id, !!coin.removable);
-      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td class="td-price">$${fmtPrice(ps)}</td><td class="td-bag">${formatLargeNum(bag)}</td></tr>`;
+      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td class="td-price-hyp">$${fmtPrice(ps)}</td><td class="td-bag">${formatLargeNum(bag)}</td></tr>`;
     }).join("") || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
 
     const compBody = document.getElementById("comp-table-body");
