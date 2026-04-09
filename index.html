@@ -156,29 +156,106 @@
     "injective-protocol":"BINANCE:INJUSDT","aptos":"COINBASE:APTUSD","sui":"COINBASE:SUIUSD",
     "bonk":"COINBASE:BONKUSD","pepe":"BINANCE:PEPEUSDT","floki":"BINANCE:FLOKIUSDT",
     "quant-network":"BINANCE:QNTUSDT","decentraland":"COINBASE:MANAUSD",
-    "theta-token":"BINANCE:THETAUSDT","zksync":"BINANCE:ZKUSDT","mantra":"BINANCE:OMUSDT",
-    "rize":"KRAKEN:RIZEUSD",
-    // Tokens sans spot Binance fiable — mappés sur Coinbase
-    "canton-network":"COINBASE:CCUSD",
-    "fetch-ai":"COINBASE:FETUSD",
-    "pudgy-penguins":"COINBASE:PENGUUSD",
-    "render-token":"COINBASE:RENDERUSD",
-    "helium":"COINBASE:HNTUSD",
-    "immutable-x":"COINBASE:IMXUSD",
-    "axie-infinity":"BINANCE:AXSUSDT",
-    "sandbox":"COINBASE:SANDUSD",
-    "gala":"BINANCE:GALAUSDT",
-    "internet-computer":"COINBASE:ICPUSD",
-    "filecoin":"COINBASE:FILUSD",
-    "the-graph":"COINBASE:GRTUSD",
-    "optimism":"COINBASE:OPUSD",
-    "arbitrum":"COINBASE:ARBUSD",
-    "celestia":"COINBASE:TIAUSD",
-    "stacks":"COINBASE:STXUSD",
-    "sei-network":"COINBASE:SEIUSD",
-    "flow":"COINBASE:FLOWUSD",
-    "casper-network":"COINBASE:CSPRUSD",
+    "theta-token":"BINANCE:THETAUSDT","zksync":"COINBASE:ZKUSD","mantra":"BINANCE:OMUSDT",
+    "rize":"KRAKEN:RIZEUSD","canton-network":"KRAKEN:CCUSD","fetch-ai":"BINANCE:FETUSDT",
+    "pudgy-penguins":"COINBASE:PENGUUSD","render-token":"COINBASE:RENDERUSD",
+    "immutable-x":"COINBASE:IMXUSD","internet-computer":"COINBASE:ICPUSD",
+    "filecoin":"COINBASE:FILUSD","the-graph":"COINBASE:GRTUSD",
+    "optimism":"COINBASE:OPUSD","arbitrum":"COINBASE:ARBUSD","celestia":"COINBASE:TIAUSD",
+    "stacks":"COINBASE:STXUSD","sei-network":"COINBASE:SEIUSD",
   };
+
+  // Ordre de préférence des exchanges (spot USD/USDT en priorité, liquidité décroissante)
+  const EXCHANGE_PRIORITY = [
+    "COINBASE","KRAKEN","BINANCE","BITSTAMP","GEMINI",
+    "BYBIT","OKX","KUCOIN","HUOBI","BITFINEX"
+  ];
+
+  // Résout le meilleur symbole TradingView via leur API de recherche publique
+  // Retourne ex: "KRAKEN:CCUSD" ou null si introuvable
+  async function resolveTVSymbol(coinSymbol) {
+    const s = coinSymbol.toUpperCase();
+    try {
+      const res = await fetch(
+        `https://symbol-search.tradingview.com/symbol_search/v3/?text=${s}&hl=false&exchange=&lang=en&type=crypto&domain=production`,
+        { headers: { "Accept": "application/json" } }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      const symbols = data?.symbols || [];
+
+      // On filtre : on veut le ticker exact (pas SBTC quand on cherche BTC)
+      // et on préfère les paires USD ou USDT
+      const exact = symbols.filter(item => {
+        const base = (item.symbol || "").replace(/USD[T]?$/, "").replace(/BTC$/, "").toUpperCase();
+        return base === s;
+      });
+
+      const pool = exact.length > 0 ? exact : symbols; // fallback si pas de match exact
+
+      // On trie par ordre de priorité d'exchange, puis on préfère USD > USDT > autres
+      const scored = pool.map(item => {
+        const exch = (item.exchange || "").toUpperCase();
+        const sym  = (item.symbol || "").toUpperCase();
+        const exchScore = EXCHANGE_PRIORITY.indexOf(exch);
+        const pairScore = sym.endsWith("USD") ? 0 : sym.endsWith("USDT") ? 1 : 2;
+        return { item, exchScore: exchScore === -1 ? 99 : exchScore, pairScore };
+      });
+
+      scored.sort((a, b) =>
+        a.exchScore !== b.exchScore ? a.exchScore - b.exchScore : a.pairScore - b.pairScore
+      );
+
+      if (!scored.length) return null;
+      const best = scored[0].item;
+      return `${(best.exchange || "").toUpperCase()}:${(best.symbol || "").toUpperCase()}`;
+    } catch(e) {
+      return null;
+    }
+  }
+
+  // Cache pour éviter de re-fetcher à chaque monitor du même token
+  const tvSymbolCache = {};
+
+  async function renderChart(coinId, coinName, coinSymbol) {
+    const section   = document.getElementById("chart-section");
+    const container = document.getElementById("tv-chart");
+    document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
+    section.style.display = "block";
+    container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:100%">Looking for chart…</div>`;
+
+    // 1. Mapping manuel connu → direct, pas d'appel réseau
+    let tvSym = TV_SYMBOLS[coinId] || null;
+
+    // 2. Cache session
+    if (!tvSym && tvSymbolCache[coinId]) tvSym = tvSymbolCache[coinId];
+
+    // 3. Recherche via API TradingView
+    if (!tvSym) {
+      tvSym = await resolveTVSymbol(coinSymbol);
+      if (tvSym) tvSymbolCache[coinId] = tvSym; // on met en cache
+    }
+
+    if (!tvSym) {
+      container.innerHTML = `<div class="chart-placeholder">No chart found for <strong>${coinName}</strong> on any supported exchange.</div>`;
+      document.getElementById("chart-sub").textContent = "No TradingView data available.";
+      return;
+    }
+
+    document.getElementById("chart-sub").textContent = `Live TradingView chart — ${tvSym}`;
+    container.innerHTML = "";
+    if (tvWidget) { try { tvWidget.remove(); } catch(e) {} tvWidget = null; }
+
+    tvWidget = new TradingView.widget({
+      container_id: "tv-chart",
+      width: "100%", height: 520,
+      symbol: tvSym, interval: "60",
+      timezone: "Etc/UTC", theme: "dark", style: "1", locale: "en",
+      toolbar_bg: "#061128",
+      enable_publishing: false, hide_top_toolbar: false,
+      hide_legend: false, save_image: false,
+    });
+  }
 
   // Toutes les requêtes CoinGecko passent par notre proxy Vercel
   function cgFetch(path, params={}) {
