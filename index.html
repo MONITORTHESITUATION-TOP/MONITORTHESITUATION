@@ -495,7 +495,7 @@
         cgFetch(`/coins/${coinId}`).catch(()=>null),
         cgFetch("/global").catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r=>r.json()).catch(()=>null),
-        cgFetch("/coins/markets",{vs_currency:"usd",ids:[coinId,"bitcoin","ethereum","chainlink"].filter((v,i,a)=>a.indexOf(v)===i).join(","),price_change_percentage:"7d"}).catch(()=>[])
+        cgFetch("/coins/markets",{vs_currency:"usd",ids:[coinId,"bitcoin","ethereum","chainlink"].filter((v,i,a)=>a.indexOf(v)===i).join(","),price_change_percentage:"7d,30d,90d"}).catch(()=>[])
       ]);
 
       const byId=Object.fromEntries(markets.map(c=>[c.id,c]));
@@ -506,6 +506,12 @@
       const {current_price:price,market_cap:mcap,fully_diluted_valuation:fdv,
              circulating_supply:supply,price_change_percentage_24h:pct24h,
              ath,market_cap_rank:rank}=main;
+
+      // Récupère les % de variation depuis perfData (contient 7d/30d/90d)
+      const mainPerf = perfById[coinId] || {};
+      const pct7d  = mainPerf.price_change_percentage_7d_in_currency  ?? null;
+      const pct30d = mainPerf.price_change_percentage_30d_in_currency ?? null;
+      const pct90d = mainPerf.price_change_percentage_90d_in_currency ?? null;
 
       document.getElementById("hero-price").textContent=price?"$"+fmtPrice(price):"N/A";
 
@@ -535,6 +541,9 @@
         <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${formatLargeNum(fdv)}</span></div>
         <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${fmtSupply(supply)}</span></div>
         <div class="metric"><span class="metric-label">24h Change</span><span class="metric-value">${fmtPct(pct24h)}</span></div>
+        <div class="metric"><span class="metric-label">7D Change</span><span class="metric-value">${pct7d!==null?fmtPct(pct7d):"N/A"}</span></div>
+        <div class="metric"><span class="metric-label">1M Change</span><span class="metric-value">${pct30d!==null?fmtPct(pct30d):"N/A"}</span></div>
+        <div class="metric"><span class="metric-label">3M Change</span><span class="metric-value">${pct90d!==null?fmtPct(pct90d):"N/A"}</span></div>
         <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">$${fmtPrice(ath)}</span></div>
         ${athBlock}
         ${tvBlock}
@@ -627,3 +636,4 @@
   </script>
 </body>
 </html>
+
