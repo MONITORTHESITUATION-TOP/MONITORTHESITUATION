@@ -125,23 +125,40 @@
     </section>
 
     <section class="section">
-      <h2 class="section-title" id="comp-title">Price Comparison vs Other Crypto Market Caps</h2>
-      <p class="section-sub" id="comp-sub">Hypothetical price if this token's market cap matched each asset's current market cap.</p>
-      <div id="comparisons"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-    </section>
+      <h2 class="section-title" id="comp-title">Price Comparison & Bag Simulation</h2>
+      <p class="section-sub" id="comp-sub">Hypothetical price if this token's market cap matched each asset's — and the value of your bag at that price.</p>
 
-    <section class="section">
-      <h2 class="section-title" id="bag-title">Bag Value Simulation</h2>
-      <p class="section-sub" id="bag-sub">Hypothetical dollar value of your bag at each simulated target price.</p>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
-        <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
-        <input type="number" id="bag-amount-input" value="1" min="1"
-          style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
-          placeholder="Enter your bag…"/>
-        <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
+      <!-- Add bar — au-dessus des tableaux, affecte les deux -->
+      <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px;flex-wrap:wrap">
+        <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+          <input type="text" id="add-compare-input" placeholder="Add any crypto to compare…"
+            autocomplete="off" spellcheck="false"
+            style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+          <div class="autocomplete-list" id="add-compare-autocomplete"></div>
+        </div>
+        <button id="add-compare-btn"
+          style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+          disabled>+ Add</button>
       </div>
-      <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-      <div class="footer-note" id="bag-formula">Formula: your bag × hypothetical price at same market cap.</div>
+      <div id="add-compare-error" style="margin-bottom:10px;font-size:13px;color:var(--pink);display:none"></div>
+
+      <!-- Price comparison table -->
+      <div id="comparisons"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+
+      <!-- Bag simulation — même section, séparée visuellement -->
+      <div style="margin-top:32px;padding-top:26px;border-top:1px solid var(--border)">
+        <h3 style="margin:0 0 6px;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:1px;color:white">Bag Value Simulation</h3>
+        <p style="margin:0 0 16px;font-size:15px;color:var(--muted)">Hypothetical value of your bag at each simulated target price.</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
+          <input type="number" id="bag-amount-input" value="1" min="1"
+            style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
+            placeholder="Enter your bag…"/>
+          <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
+        </div>
+        <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+        <div class="footer-note">Formula: your bag size × hypothetical price at same market cap.</div>
+      </div>
     </section>
 
     <section class="section">
@@ -660,19 +677,7 @@
         <div class="table-wrap"><table>
           <thead id="comp-table-head"><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr></thead>
           <tbody id="comp-table-body"></tbody>
-        </table></div>
-        <div style="display:flex;gap:10px;align-items:stretch;margin-top:16px;flex-wrap:wrap">
-          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
-            <input type="text" id="add-compare-input" placeholder="Add any crypto to compare…"
-              autocomplete="off" spellcheck="false"
-              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
-            <div class="autocomplete-list" id="add-compare-autocomplete"></div>
-          </div>
-          <button id="add-compare-btn"
-            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
-            disabled>+ Add</button>
-        </div>
-        <div id="add-compare-error" style="margin-top:8px;font-size:13px;color:var(--pink);display:none"></div>`;
+        </table></div>`;
 
       document.getElementById("bag-simulations").innerHTML=`
         <div class="table-wrap"><table>
@@ -680,15 +685,17 @@
           <tbody id="bag-table-body"></tbody>
         </table></div>`;
 
-      // Bag amount input
+      // Bag input — clone pour reset les listeners proprement
       const bagInput = document.getElementById("bag-amount-input");
       const bagDisplay = document.getElementById("bag-amount-display");
       if(bagInput){
-        bagInput.addEventListener("input",()=>{
-          const v = parseFloat(bagInput.value);
+        const freshBag = bagInput.cloneNode(true);
+        bagInput.parentNode.replaceChild(freshBag, bagInput);
+        freshBag.addEventListener("input",()=>{
+          const v = parseFloat(freshBag.value);
           if(!isNaN(v) && v > 0){
             currentBagAmount = v;
-            bagDisplay.textContent = `= ${Number(v).toLocaleString()} token${v===1?"":"s"}`;
+            if(bagDisplay) bagDisplay.textContent = `= ${Number(v).toLocaleString()} token${v===1?"":"s"}`;
             renderTables();
           }
         });
@@ -696,66 +703,69 @@
 
       renderTables();
 
-      // ── Autocomplete pour Add compare
-      let addSearchResults=[], addDebounce=null, addSelected=null;
-      const addInput = document.getElementById("add-compare-input");
-      const addAC    = document.getElementById("add-compare-autocomplete");
-      const addBtn   = document.getElementById("add-compare-btn");
-      const addErr   = document.getElementById("add-compare-error");
+      // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
+      const addInputEl = document.getElementById("add-compare-input");
+      const addACEl    = document.getElementById("add-compare-autocomplete");
+      const addBtnEl   = document.getElementById("add-compare-btn");
+      const addErrEl   = document.getElementById("add-compare-error");
 
-      addInput.addEventListener("input",()=>{
+      const freshAddInput = addInputEl.cloneNode(true);
+      addInputEl.parentNode.replaceChild(freshAddInput, addInputEl);
+      const freshAddBtn = addBtnEl.cloneNode(true);
+      addBtnEl.parentNode.replaceChild(freshAddBtn, addBtnEl);
+      freshAddBtn.disabled = true;
+
+      let addSearchResults=[], addDebounce=null, addSelected=null;
+
+      freshAddInput.addEventListener("input",()=>{
         clearTimeout(addDebounce);
-        const q=addInput.value.trim();
-        if(q.length<2){addAC.classList.remove("open");addAC.innerHTML="";return;}
+        const q=freshAddInput.value.trim();
+        if(q.length<2){addACEl.classList.remove("open");addACEl.innerHTML="";return;}
         addDebounce=setTimeout(async()=>{
           try{
             const data=await cgFetch("/search",{query:q});
             addSearchResults=(data.coins||[]).slice(0,6);
-            if(!addSearchResults.length){addAC.classList.remove("open");return;}
-            addAC.innerHTML=addSearchResults.map((c,i)=>`
+            if(!addSearchResults.length){addACEl.classList.remove("open");return;}
+            addACEl.innerHTML=addSearchResults.map((c,i)=>`
               <div class="autocomplete-item" data-i="${i}">
                 <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
                 <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
                 <span class="autocomplete-name">${c.name}</span>
               </div>`).join("");
-            addAC.querySelectorAll(".autocomplete-item").forEach((el,i)=>{
+            addACEl.querySelectorAll(".autocomplete-item").forEach((el,i)=>{
               el.addEventListener("mousedown",e=>{
                 e.preventDefault();
                 addSelected=addSearchResults[i];
-                addInput.value=`${addSelected.name} (${addSelected.symbol.toUpperCase()})`;
-                addBtn.disabled=false;
-                addAC.classList.remove("open");
+                freshAddInput.value=`${addSelected.name} (${addSelected.symbol.toUpperCase()})`;
+                freshAddBtn.disabled=false;
+                addACEl.classList.remove("open");
               });
             });
-            addAC.classList.add("open");
-          }catch{addAC.classList.remove("open");}
+            addACEl.classList.add("open");
+          }catch{addACEl.classList.remove("open");}
         },320);
       });
 
-      document.addEventListener("click",e=>{
-        if(!e.target.closest("#add-compare-input")&&!e.target.closest("#add-compare-autocomplete"))
-          addAC.classList.remove("open");
-      });
-
-      addBtn.addEventListener("click", async()=>{
+      freshAddBtn.addEventListener("click", async()=>{
         if(!addSelected)return;
-        const allIds2=[...compareCoins,...extraCompareCoins].map(c=>c.id);
-        if(allIds2.includes(addSelected.id)||addSelected.id===coinId){
-          addErr.textContent="Already in comparison.";addErr.style.display="block";return;
+        const existingIds=[...compareCoins,...extraCompareCoins].map(c=>c.id);
+        if(existingIds.includes(addSelected.id)||addSelected.id===coinId){
+          if(addErrEl){addErrEl.textContent="Already in comparison.";addErrEl.style.display="block";}
+          return;
         }
-        addErr.style.display="none";
-        addBtn.disabled=true; addBtn.textContent="Loading…";
+        if(addErrEl) addErrEl.style.display="none";
+        freshAddBtn.disabled=true; freshAddBtn.textContent="Loading…";
         try{
           const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:addSelected.id});
           if(!res||!res[0]?.market_cap) throw new Error("No market data");
           currentByIdRef[addSelected.id]=res[0];
           extraCompareCoins.push({label:addSelected.symbol.toUpperCase(),id:addSelected.id,removable:true});
           renderTables();
-          addInput.value=""; addSelected=null; addBtn.disabled=true;
+          freshAddInput.value=""; addSelected=null; freshAddBtn.disabled=true;
         }catch{
-          addErr.textContent="Could not fetch data for this token.";addErr.style.display="block";
+          if(addErrEl){addErrEl.textContent="Could not fetch data for this token.";addErrEl.style.display="block";}
         }finally{
-          addBtn.textContent="+ Add";
+          freshAddBtn.textContent="+ Add";
         }
       });
 
