@@ -485,7 +485,9 @@
     setLoading(); monitorBtn.disabled=true; setSearchError(""); renderChart(coinId,coinName,sym);
 
     const compareIds=compareCoins.map(c=>c.id).filter(id=>id!==coinId);
-    const allIds=[coinId,...compareIds].join(",");
+    // On force chainlink dans le fetch pour toujours pouvoir calculer sa dominance
+    const allIds=[coinId,...compareIds].filter((v,i,a)=>a.indexOf(v)===i)
+      .concat(coinId==="chainlink"?[]:["chainlink"]).filter((v,i,a)=>a.indexOf(v)===i).join(",");
 
     try{
       const [markets,detail,globalData,fearGreed,perfData]=await Promise.all([
@@ -566,7 +568,9 @@
         const mcapPcts = globalData.data.market_cap_percentage;
         const btcDom  = mcapPcts.btc;
         const ethDom  = mcapPcts.eth;
-        const linkDom = mcapPcts.link || null;   // LINK dominance (point 3)
+        // LINK dominance : calculée depuis son mcap (présent dans byId) / total market cap
+        const linkMcap = byId["chainlink"]?.market_cap || null;
+        const linkDom  = linkMcap && totalCap ? (linkMcap / totalCap * 100) : null;
         const totalCap= globalData.data.total_market_cap.usd;
 
         // Dominance de l'asset sélectionné (point 3) — on calcule depuis mcap/totalCap
