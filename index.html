@@ -252,17 +252,92 @@
   function setLoading(){const ph='<div class="loading-text">Loading data…</div>';["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=ph);}
   function setError(msg){const b=`<div class="error-box">⚠ ${msg}</div>`;["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=b);}
 
-  function renderChart(coinId,coinName){
-    const sym=TV_SYMBOLS[coinId]||null;
-    const section=document.getElementById("chart-section");
-    const container=document.getElementById("tv-chart");
-    document.getElementById("chart-title").textContent=`${coinName.toUpperCase()} / USD Chart`;
-    document.getElementById("chart-sub").textContent="Live TradingView chart embedded in the dashboard.";
-    section.style.display="block";
-    if(!sym){container.innerHTML=`<div class="chart-placeholder">No TradingView symbol mapping for <strong>${coinId}</strong>.</div>`;return;}
-    container.innerHTML="";
-    if(tvWidget){try{tvWidget.remove();}catch(e){}tvWidget=null;}
-    tvWidget=new TradingView.widget({container_id:"tv-chart",width:"100%",height:520,symbol:sym,interval:"60",timezone:"Etc/UTC",theme:"dark",style:"1",locale:"en",toolbar_bg:"#061128",enable_publishing:false,hide_top_toolbar:false,hide_legend:false,save_image:false});
+  // Génère une liste de symboles candidats à tester dans l'ordre
+  function getCandidateSymbols(coinId, coinSymbol) {
+    // Mapping manuel pour les cas connus — fiable à 100%
+    if (TV_SYMBOLS[coinId]) return [TV_SYMBOLS[coinId]];
+    const s = coinSymbol.toUpperCase();
+    // Ordre : exchanges les plus liquides en premier
+    return [
+      `BINANCE:${s}USDT`,
+      `COINBASE:${s}USD`,
+      `KRAKEN:${s}USD`,
+      `BYBIT:${s}USDT`,
+      `OKX:${s}USDT`,
+      `BINANCE:${s}BTC`,   // fallback paire BTC pour les petits tokens
+    ];
+  }
+
+  // Crée un widget TradingView et retourne une Promise qui resolve
+  // avec true si le symbole est valide, false sinon (timeout 4s)
+  function tryTVSymbol(symbol, container) {
+    return new Promise(resolve => {
+      container.innerHTML = "";
+      if (tvWidget) { try { tvWidget.remove(); } catch(e) {} tvWidget = null; }
+
+      let resolved = false;
+      const done = (ok) => { if (!resolved) { resolved = true; resolve(ok); } };
+
+      // TradingView envoie un postMessage "tv-widget-load-failed" si symbole invalide
+      const onMsg = (e) => {
+        if (typeof e.data !== "object") return;
+        const t = e.data?.type || e.data?.name || "";
+        if (t === "tv-widget-load-failed" || t === "widgetReady" ||
+            (typeof t === "string" && t.includes("symbol_error"))) {
+          window.removeEventListener("message", onMsg);
+          done(t === "widgetReady");
+        }
+      };
+      window.addEventListener("message", onMsg);
+
+      try {
+        tvWidget = new TradingView.widget({
+          container_id: "tv-chart",
+          width: "100%", height: 520,
+          symbol: symbol, interval: "60",
+          timezone: "Etc/UTC", theme: "dark", style: "1", locale: "en",
+          toolbar_bg: "#061128",
+          enable_publishing: false, hide_top_toolbar: false,
+          hide_legend: false, save_image: false,
+          // Callback interne TradingView — se déclenche si le chart charge bien
+          onChartReady: () => { window.removeEventListener("message", onMsg); done(true); },
+        });
+      } catch(e) {
+        window.removeEventListener("message", onMsg);
+        done(false);
+        return;
+      }
+
+      // Timeout de sécurité : si pas de réponse en 4s, on considère OK
+      // (le widget a chargé silencieusement sans callback)
+      setTimeout(() => { window.removeEventListener("message", onMsg); done(true); }, 4000);
+    });
+  }
+
+  async function renderChart(coinId, coinName, coinSymbol) {
+    const section   = document.getElementById("chart-section");
+    const container = document.getElementById("tv-chart");
+    document.getElementById("chart-title").textContent = `${coinName.toUpperCase()} / USD Chart`;
+    document.getElementById("chart-sub").textContent   = "Live TradingView chart embedded in the dashboard.";
+    section.style.display = "block";
+
+    // Affiche un état "recherche du chart" pendant qu'on teste les symboles
+    container.innerHTML = `<div class="loading-text" style="display:flex;align-items:center;justify-content:center;height:100%">Looking for chart…</div>`;
+
+    const candidates = getCandidateSymbols(coinId, coinSymbol || coinId);
+
+    for (const candidate of candidates) {
+      const ok = await tryTVSymbol(candidate, container);
+      if (ok) {
+        // Succès — on met à jour le sous-titre avec le symbole trouvé
+        document.getElementById("chart-sub").textContent = `Live TradingView chart — ${candidate}`;
+        return;
+      }
+    }
+
+    // Aucun candidat n'a fonctionné
+    if (tvWidget) { try { tvWidget.remove(); } catch(e) {} tvWidget = null; }
+    container.innerHTML = `<div class="chart-placeholder">No chart available for <strong>${coinName}</strong> on major exchanges.</div>`;
   }
 
   const compareCoins=[
@@ -284,7 +359,7 @@
     document.getElementById("bag-title").textContent=`1,000,000 ${sym} Bag Value Simulation`;
     document.getElementById("bag-sub").textContent=`Hypothetical dollar value of a 1,000,000 ${sym} bag at each simulated target price.`;
     document.getElementById("bag-formula").textContent=`Formula: 1,000,000 ${sym} × hypothetical price at same market cap.`;
-    setLoading(); monitorBtn.disabled=true; setSearchError(""); renderChart(coinId,coinName);
+    setLoading(); monitorBtn.disabled=true; setSearchError(""); renderChart(coinId,coinName,sym);
 
     const compareIds=compareCoins.map(c=>c.id).filter(id=>id!==coinId);
     const allIds=[coinId,...compareIds].join(",");
