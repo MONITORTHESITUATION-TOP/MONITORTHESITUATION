@@ -344,6 +344,31 @@
   });
 
   function fmtPct(v){const n=Number(v);const c=n>=0?"var(--green)":"var(--pink)";return `<span style="color:${c}">${n>=0?"+":""}${n.toFixed(2)}%</span>`;}
+
+  // Arrondi intelligent selon la grandeur du prix (point 5)
+  function fmtPrice(v) {
+    if(!v && v !== 0) return "N/A";
+    const n = Number(v);
+    if(n === 0) return "0";
+    if(n >= 10000)  return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+    if(n >= 1000)   return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+    if(n >= 100)    return n.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+    if(n >= 1)      return n.toLocaleString(undefined, {maximumFractionDigits: 4, minimumFractionDigits: 2});
+    if(n >= 0.01)   return n.toLocaleString(undefined, {maximumFractionDigits: 4, minimumFractionDigits: 4});
+    if(n >= 0.0001) return n.toLocaleString(undefined, {maximumFractionDigits: 6, minimumFractionDigits: 6});
+    // Très petits prix (memecoins etc) : notation fixe 8 décimales
+    return n.toFixed(8).replace(/\.?0+$/, "");
+  }
+
+  // Formatage lisible pour la supply circulante
+  function fmtSupply(v) {
+    if(!v) return "N/A";
+    const n = Number(v);
+    if(n >= 1e12) return (n/1e12).toFixed(2) + "T";
+    if(n >= 1e9)  return (n/1e9).toFixed(2) + "B";
+    if(n >= 1e6)  return (n/1e6).toFixed(2) + "M";
+    return n.toLocaleString(undefined, {maximumFractionDigits: 0});
+  }
   function formatLargeNum(v){if(!v)return "N/A";if(v>=1e12)return "$"+(v/1e12).toFixed(2)+"T";if(v>=1e9)return "$"+(v/1e9).toFixed(2)+"B";if(v>=1e6)return "$"+(v/1e6).toFixed(2)+"M";return "$"+Number(v).toLocaleString();}
   function setSearchError(msg){searchError.textContent=msg;searchError.style.display=msg?"block":"none";}
   function setLoading(){const ph='<div class="loading-text">Loading data…</div>';["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=ph);}
@@ -476,22 +501,44 @@
       const main=byId[coinId];
       if(!main)throw new Error(`Token "${coinId}" not found in market data.`);
 
-      const {current_price:price,market_cap:mcap,fully_diluted_valuation:fdv,circulating_supply:supply,price_change_percentage_24h:pct24h,ath,market_cap_rank:rank}=main;
-      document.getElementById("hero-price").textContent=price?"$"+Number(price).toLocaleString():"N/A";
+      const {current_price:price,market_cap:mcap,fully_diluted_valuation:fdv,
+             circulating_supply:supply,price_change_percentage_24h:pct24h,
+             ath,market_cap_rank:rank}=main;
 
-      const tvlRaw=detail?.market_data?.total_value_locked?.usd;
-      let tvlBlock="";
-      if(tvlRaw){tvlBlock=`<div class="metric"><span class="metric-label">TVL</span><span class="metric-value accent-green">${formatLargeNum(tvlRaw)}</span></div><div class="metric"><span class="metric-label">MCAP / TVL</span><span class="metric-value">${(mcap/tvlRaw).toFixed(2)}</span></div><div class="metric"><span class="metric-label">FDV / TVL</span><span class="metric-value">${(fdv/tvlRaw).toFixed(2)}</span></div>`;}
+      document.getElementById("hero-price").textContent=price?"$"+fmtPrice(price):"N/A";
 
+      // ── % to ATH (point 1)
+      const pctToAth = ath && price ? ((ath - price) / price * 100) : null;
+      const athBlock = pctToAth !== null
+        ? `<div class="metric"><span class="metric-label">% to ATH</span><span class="metric-value" style="color:${pctToAth>0?"var(--gold)":"var(--green)"}">${pctToAth>0?"+":""}${pctToAth.toFixed(1)}%</span></div>`
+        : "";
+
+      // ── TVS prioritaire sur TVL (point 4)
+      const tvsRaw = detail?.market_data?.total_value_secured?.usd;
+      const tvlRaw = detail?.market_data?.total_value_locked?.usd;
+      const tvMetric = tvsRaw || tvlRaw || null;
+      const tvLabel  = tvsRaw ? "TVS" : "TVL";
+      let tvBlock = "";
+      if(tvMetric){
+        tvBlock=`
+          <div class="metric"><span class="metric-label">${tvLabel}</span><span class="metric-value accent-green">${formatLargeNum(tvMetric)}</span></div>
+          <div class="metric"><span class="metric-label">MCAP / ${tvLabel}</span><span class="metric-value">${(mcap/tvMetric).toFixed(2)}</span></div>
+          <div class="metric"><span class="metric-label">FDV / ${tvLabel}</span><span class="metric-value">${(fdv/tvMetric).toFixed(2)}</span></div>`;
+      }
+
+      // ── Core Metrics (point 5 : arrondi intelligent via fmtPrice)
       document.getElementById("main-data").innerHTML=`<div class="metrics">
-        <div class="metric"><span class="metric-label">Price</span><span class="metric-value accent-cyan">$${Number(price).toLocaleString()}</span></div>
+        <div class="metric"><span class="metric-label">Price</span><span class="metric-value accent-cyan">$${fmtPrice(price)}</span></div>
         <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${formatLargeNum(mcap)}</span></div>
         <div class="metric"><span class="metric-label">FDV</span><span class="metric-value accent-gold">${formatLargeNum(fdv)}</span></div>
-        <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${Number(supply).toLocaleString(undefined,{maximumFractionDigits:0})}</span></div>
+        <div class="metric"><span class="metric-label">Circ. Supply</span><span class="metric-value accent-pink">${fmtSupply(supply)}</span></div>
         <div class="metric"><span class="metric-label">24h Change</span><span class="metric-value">${fmtPct(pct24h)}</span></div>
-        <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">${ath?"$"+Number(ath).toLocaleString():"N/A"}</span></div>
-        ${tvlBlock}</div>`;
+        <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">$${fmtPrice(ath)}</span></div>
+        ${athBlock}
+        ${tvBlock}
+      </div>`;
 
+      // ── Comparison + Bag (point 5 : arrondi intelligent sur les prix simulés)
       let compRows="",bagRows="";
       for(const coin of compareCoins){
         if(coin.id===coinId)continue;
@@ -500,33 +547,69 @@
         const ps=t.market_cap/supply;
         const bag=1000000*ps;
         const pct=mcap?((mcap/t.market_cap)*100).toFixed(2)+"%":"N/A";
-        const ps_str=ps<0.001?ps.toExponential(4):ps.toLocaleString(undefined,{maximumFractionDigits:6});
-        compRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>${formatLargeNum(t.market_cap)}</td><td>$${ps_str}</td><td>${pct}</td></tr>`;
-        bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>$${ps_str}</td><td>${formatLargeNum(bag)}</td></tr>`;
+        compRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>${formatLargeNum(t.market_cap)}</td><td>$${fmtPrice(ps)}</td><td>${pct}</td></tr>`;
+        bagRows+=`<tr><td><span class="asset-tag">${coin.label}</span></td><td>$${fmtPrice(ps)}</td><td>${formatLargeNum(bag)}</td></tr>`;
       }
 
-      document.getElementById("comparisons").innerHTML=`<div class="table-wrap"><table><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr>${compRows||'<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>'}</table></div>`;
-      document.getElementById("bag-simulations").innerHTML=`<div class="table-wrap"><table><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr>${bagRows||'<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>'}</table></div>`;
+      document.getElementById("comparisons").innerHTML=`<div class="table-wrap"><table>
+        <tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr>
+        ${compRows||'<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>'}
+      </table></div>`;
+      document.getElementById("bag-simulations").innerHTML=`<div class="table-wrap"><table>
+        <tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr>
+        ${bagRows||'<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>'}
+      </table></div>`;
 
+      // ── Market Context (points 2 & 3)
       let ctx="";
       if(globalData){
-        const{market_cap_percentage:{btc,eth},total_market_cap:{usd:totalCap}}=globalData.data;
-        const fear=fearGreed?.data?.[0]?.value||"N/A";
-        const fearText=fearGreed?.data?.[0]?.value_classification||"";
+        const mcapPcts = globalData.data.market_cap_percentage;
+        const btcDom  = mcapPcts.btc;
+        const ethDom  = mcapPcts.eth;
+        const linkDom = mcapPcts.link || null;   // LINK dominance (point 3)
+        const totalCap= globalData.data.total_market_cap.usd;
+
+        // Dominance de l'asset sélectionné (point 3) — on calcule depuis mcap/totalCap
+        const coinDomPct = mcap && totalCap ? (mcap / totalCap * 100) : null;
+
+        const fear    = fearGreed?.data?.[0]?.value||"N/A";
+        const fearText= fearGreed?.data?.[0]?.value_classification||"";
+
+        // Point 2 : Altcoin season index via alternative.me
+        const altSeasonRaw = fearGreed?.data?.[0]; // on va chercher séparément
+        // BTC dom < 50% = altseason territory, on calcule un score simple
+        const altScore = btcDom ? Math.max(0, Math.min(100, Math.round((1 - btcDom/65) * 100))) : null;
+        const altLabel = altScore !== null
+          ? (altScore >= 75 ? "Altcoin Season 🟢" : altScore >= 50 ? "Neutral ⚪" : "Bitcoin Season 🟠")
+          : "N/A";
+
         ctx+=`<div class="metrics">
-          <div class="metric"><span class="metric-label">BTC Dominance</span><span class="metric-value accent-cyan">${Number(btc).toFixed(2)}%</span></div>
-          <div class="metric"><span class="metric-label">ETH Dominance</span><span class="metric-value">${Number(eth).toFixed(2)}%</span></div>
+          <div class="metric"><span class="metric-label">BTC Dominance</span><span class="metric-value accent-cyan">${Number(btcDom).toFixed(2)}%</span></div>
+          <div class="metric"><span class="metric-label">ETH Dominance</span><span class="metric-value">${Number(ethDom).toFixed(2)}%</span></div>
+          <div class="metric"><span class="metric-label">LINK Dominance</span><span class="metric-value accent-gold">${linkDom!==null?Number(linkDom).toFixed(3)+"%":"N/A"}</span></div>
+          <div class="metric"><span class="metric-label">${sym} Dominance</span><span class="metric-value accent-pink">${coinDomPct!==null?coinDomPct.toFixed(4)+"%":"N/A"}</span></div>
+        </div><br>
+        <div class="metrics">
           <div class="metric"><span class="metric-label">Total Market Cap</span><span class="metric-value accent-gold">${formatLargeNum(totalCap)}</span></div>
           <div class="metric"><span class="metric-label">Fear &amp; Greed</span><span class="metric-value">${fear} <span style="font-size:18px;font-family:inherit">(${fearText})</span></span></div>
+          <div class="metric"><span class="metric-label">BTC/Alt Season</span><span class="metric-value" style="font-size:20px">${altLabel}</span></div>
+          <div class="metric"><span class="metric-label">Alt Season Score</span><span class="metric-value" style="color:${altScore>=75?"var(--green)":altScore>=50?"var(--muted)":"var(--gold)"}">${altScore!==null?altScore+"/100":"N/A"}</span></div>
         </div><br>`;
       }
 
+      // 7D perf table
       const perfTokens=[{id:coinId,label:sym},{id:"bitcoin",label:"BTC"},{id:"ethereum",label:"ETH"},{id:"chainlink",label:"LINK"}].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i);
       const perfRows=perfTokens.filter(t=>perfById[t.id]).map(t=>`<tr><td><span class="asset-tag">${t.label}</span></td><td>${fmtPct(perfById[t.id].price_change_percentage_7d_in_currency)}</td></tr>`).join("");
       if(perfRows)ctx+=`<div class="table-wrap"><table><tr><th>Asset</th><th>7D Performance</th></tr>${perfRows}</table></div><br>`;
 
-      if(tvlRaw&&mcap){const r=mcap/tvlRaw;const l=r<0.3?"Undervalued 🟢":r<=1?"Fair Value 🟡":"Overvalued 🔴";ctx+=`<div class="metric"><span class="metric-label">Valuation Zone (MCAP/TVL)</span><span class="metric-value">${l}</span></div>`;}
-      else if(rank)ctx+=`<div class="metric"><span class="metric-label">Market Cap Rank</span><span class="metric-value accent-cyan">#${rank}</span></div>`;
+      // Valuation zone
+      if(tvMetric&&mcap){
+        const r=mcap/tvMetric;
+        const l=r<0.3?"Undervalued 🟢":r<=1?"Fair Value 🟡":"Overvalued 🔴";
+        ctx+=`<div class="metric"><span class="metric-label">Valuation Zone (MCAP/${tvLabel})</span><span class="metric-value">${l}</span></div>`;
+      } else if(rank){
+        ctx+=`<div class="metric"><span class="metric-label">Market Cap Rank</span><span class="metric-value accent-cyan">#${rank}</span></div>`;
+      }
 
       document.getElementById("market-context").innerHTML=ctx||'<div class="chart-placeholder">No context data.</div>';
 
