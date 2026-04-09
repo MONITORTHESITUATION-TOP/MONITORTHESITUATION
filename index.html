@@ -881,7 +881,14 @@
     if(n >= 1e6)  return (n/1e6).toFixed(2) + "M";
     return n.toLocaleString(undefined, {maximumFractionDigits: 0});
   }
-  function formatLargeNum(v){if(!v)return "N/A";if(v>=1e12)return "$"+(v/1e12).toFixed(2)+"T";if(v>=1e9)return "$"+(v/1e9).toFixed(2)+"B";if(v>=1e6)return "$"+(v/1e6).toFixed(2)+"M";return "$"+Number(v).toLocaleString();}
+  function formatLargeNum(v){
+    if(!v) return "N/A";
+    if(v>=1e12) return "$"+(v/1e12).toFixed(2)+"T";
+    if(v>=1e9)  return "$"+(v/1e9).toFixed(2)+"B";
+    if(v>=1e6)  return "$"+(v/1e6).toFixed(2)+"M";
+    if(v>=1000) return "$"+Math.round(v).toLocaleString();
+    return "$"+Number(v).toLocaleString();
+  }
   function setSearchError(msg){searchError.textContent=msg;searchError.style.display=msg?"block":"none";}
   function setLoading(){const ph='<div class="loading-text">Loading data…</div>';["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=ph);}
   function setError(msg){const b=`<div class="error-box">⚠ ${msg}</div>`;["main-data","comparisons","bag-simulations","market-context"].forEach(id=>document.getElementById(id).innerHTML=b);}
