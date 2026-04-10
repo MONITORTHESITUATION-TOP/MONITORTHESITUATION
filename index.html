@@ -348,12 +348,12 @@
     th {
       position: sticky; top: 0;
       background: rgba(6,8,24,0.99);
-      color: rgba(255,255,255,0.92); font-size: 15px;
+      color: rgba(255,255,255,0.92); font-size: 16px;
       text-transform: uppercase; letter-spacing: 1.5px; z-index: 1;
       font-weight: 700;
     }
 
-    td { color: white; font-size: 17px; font-weight: 600; }
+    td { color: white; font-size: 20px; font-weight: 600; }
     tbody tr:hover td { background: rgba(126,224,255,0.03); }
 
     .asset-tag {
@@ -494,7 +494,7 @@
     <nav class="site-nav">
       <a href="/">Home</a>
       <a href="/app">App</a>
-      <a href="/support" class="nav-support">♥ Support the app — keep it free</a>
+      <a href="/support" class="nav-support">Support the app — keep it free</a>
     </nav>
   </header>
   <div class="wrap">
@@ -915,6 +915,11 @@
 
 
   // Couleur du tag selon l'asset
+  function assetTagClass2(coinId) {
+    const map = {"bitcoin":"tag-btc","ethereum":"tag-eth","chainlink":"tag-link","solana":"tag-sol","ripple":"tag-xrp"};
+    return "asset-tag " + (map[coinId] || "");
+  }
+
   function assetTagClass(coinId, isExtra) {
     if(isExtra) return "asset-tag tag-extra";
     const map = {
@@ -1238,7 +1243,12 @@
       // 7D perf table
       const perfTokens=[{id:coinId,label:sym},{id:"bitcoin",label:"BTC"},{id:"ethereum",label:"ETH"},{id:"chainlink",label:"LINK"}].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i);
       const perfRows=perfTokens.filter(t=>perfById[t.id]).map(t=>`<tr><td><span class="asset-tag">${t.label}</span></td><td>${fmtPct(perfById[t.id].price_change_percentage_7d_in_currency)}</td></tr>`).join("");
-      if(perfRows)ctx+=`<div class="table-wrap"><table><tr><th>Asset</th><th>7D Performance</th></tr>${perfRows}</table></div><br>`;
+      const perfRows30=perfTokens.filter(t=>perfById[t.id]).map(t=>{
+        const p=perfById[t.id];
+        const p30=p.price_change_percentage_30d_in_currency;
+        return `<tr><td><span class="asset-tag ${assetTagClass2(t.id)}">${t.label}</span></td><td>${fmtPct(p.price_change_percentage_7d_in_currency)}</td><td>${p30!=null?fmtPct(p30):"N/A"}</td></tr>`;
+      }).join("");
+      if(perfRows30)ctx+=`<div class="table-wrap"><table><tr><th>Asset</th><th>7D Perf.</th><th>30D Perf.</th></tr>${perfRows30}</table></div><br>`;
 
       // Valuation zone
       if(tvMetric&&mcap){
@@ -1268,7 +1278,7 @@
     <nav class="footer-nav">
       <a href="/">Home</a>
       <a href="/app">App</a>
-      <a href="/support" class="nav-support">♥ Support the app — keep it free</a>
+      <a href="/support" class="nav-support">Support the app — keep it free</a>
     </nav>
     <p class="footer-copy">© 2026 Monitor The Situation — Live data terminal</p>
   </footer>
