@@ -371,12 +371,52 @@
     .asset-tag.tag-extra{ color:#3DBE47; border-color:rgba(61,190,71,0.5); background:rgba(61,190,71,0.08); }
     /* Highlight des colonnes de valeur dans les tableaux */
     .td-price      { color: #98ffb6 !important; font-weight: 700; }
+    .td-price-down { color: var(--pink) !important; font-weight: 700; }
     .td-price-hyp  { color: white !important; font-weight: 700; }
     .td-bag        { color: #98ffb6 !important; font-weight: 700; }
 
     .footer-note {
       margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.45;
       font-family: "Trebuchet MS","Verdana",sans-serif;
+    }
+
+
+    /* ── REMOVE BUTTON ── */
+    .remove-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(180,190,210,0.85);
+      cursor: pointer; font-size: 11px; font-weight: 700;
+      margin-right: 8px; flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      vertical-align: middle; font-family: 'Rajdhani', monospace;
+    }
+    .remove-btn:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.45);
+      color: #fff;
+    }
+    /* ── PERF TABLE (table 3) ── */
+    .td-pct-up   { color: #3DBE47 !important; font-weight:700; }
+    .td-pct-down { color: #e05555 !important; font-weight:700; }
+    /* ── SCREENSHOT BUTTON ── */
+    .screenshot-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px;
+      background: rgba(126,224,255,0.06);
+      border: 1px solid rgba(126,224,255,0.22);
+      color: var(--cyan); font-family: 'Rajdhani', monospace;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .screenshot-btn:hover { background: rgba(126,224,255,0.18); color:#fff; }
+    .section-titlebar-row {
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 6px;
     }
 
     /* ═══════════════ MISC ═══════════════ */
@@ -534,16 +574,16 @@
     </div>
     </section>
 
-    <section class="section">
-      <div class="section-titlebar"><span class="section-title" id="metrics-title">Core Metrics</span></div>
+    <section class="section" id="metrics-section">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
       <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     </div>
     </section>
 
-    <section class="section">
-      <div class="section-titlebar"><span class="section-title" id="comp-title">Price Comparison & Bag Simulation</span></div>
+    <section class="section" id="comp-section">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price Comparison & Bag Simulation</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">Hypothetical price if this token's market cap matched each asset's — and the value of your bag at that price.</p>
 
@@ -581,8 +621,35 @@
     </div>
     </section>
 
-    <section class="section">
-      <div class="section-titlebar"><span class="section-title">Market Context</span></div>
+    <!-- PERF TABLE — Table 3, after bag sim -->
+    <section class="section" id="perf-section">
+      <div class="section-titlebar-row">
+        <div class="section-titlebar" style="margin:0"><span class="section-title" id="perf-title">Performance Comparison</span></div>
+        <button class="screenshot-btn" onclick="takeScreenshot('perf-section','perf')">&#128247; Screenshot</button>
+      </div>
+      <div class="section-body">
+      <p class="section-sub" id="perf-sub">7D, 30D and 90D price performance of selected token vs comparison assets.</p>
+      <div id="perf-table-wrap"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+      <!-- Mobile duplicate search bar -->
+      <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
+        <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+            <input type="text" id="add-compare-input-footer" placeholder="Add any crypto to compare…"
+              autocomplete="off" spellcheck="false"
+              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+            <div class="autocomplete-list" id="add-compare-autocomplete-footer"></div>
+          </div>
+          <button id="add-compare-btn-footer"
+            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+            disabled>+ Add</button>
+        </div>
+        <div id="add-compare-error-footer" style="margin-top:6px;font-size:13px;color:var(--pink);display:none"></div>
+      </div>
+    </div>
+    </section>
+
+    <section class="section" id="mktctx-section">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Market Context</span></div><button class="screenshot-btn" onclick="takeScreenshot('mktctx-section','market-context')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub">Broader market positioning, relative performance, and valuation signal.</p>
       <div id="market-context"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
@@ -910,8 +977,11 @@
   // État global pour re-render les tableaux après Add/Remove/Sort/BagChange
   let currentByIdRef={}, currentCoinId=null, currentSupply=null, currentMcap=null, currentSym="";
   let currentBagAmount = 1;
+  let currentPrice = null;
   let sortComp  = {col:"mcap", dir:"desc"};
   let sortBag   = {col:"price", dir:"desc"};
+  let sortPerf  = {col:"7d", dir:"desc"};
+  let currentPerfData = {}; // id -> {p7d, p30d, p90d}
 
 
   // Couleur du tag selon l'asset
@@ -929,63 +999,90 @@
     return "asset-tag " + (map[coinId] || "");
   }
 
+  function pctArrow(val) {
+    if(val===null||val===undefined) return "";
+    const up = val >= 0;
+    const col = up ? "var(--green)" : "var(--pink)";
+    const arr = up ? "↑" : "↓";
+    return `<span style="color:${col};font-size:13px;margin-left:4px">${arr}</span>`;
+  }
+
   function renderTables() {
     const allCoins = [...compareCoins, ...extraCompareCoins]
       .filter(c => c.id !== currentCoinId && currentByIdRef[c.id]?.market_cap && currentSupply);
 
-    // Calcul des rows
     let rows = allCoins.map(coin => {
       const t   = currentByIdRef[coin.id];
       const ps  = t.market_cap / currentSupply;
       const bag = currentBagAmount * ps;
       const pct = currentMcap ? (currentMcap / t.market_cap * 100) : null;
-      return { coin, mcap: t.market_cap, ps, bag, pct };
+      // Price delta vs current price
+      const priceDelta = currentPrice ? ((ps - currentPrice) / currentPrice * 100) : null;
+      return { coin, mcap: t.market_cap, ps, bag, pct, priceDelta };
     });
 
-    // Tri comparaison
     rows.sort((a,b) => {
       const v = (r) => sortComp.col==="mcap" ? r.mcap : sortComp.col==="price" ? r.ps : r.pct||0;
       return sortComp.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
     });
 
-    // Indicateur de tri dans les headers
-    const compCols = ["mcap","price","pct"];
-    const compHeaders = ["MCAP","${currentSym} Price","% of MCAP"];
-    const thComp = ["Asset","MCAP",`${currentSym} Price`,"% of MCAP"].map((label,i)=>{
+    const thComp = ["Asset","MCAP",`${currentSym} Price`,"% Change","% of MCAP"].map((label,i)=>{
       if(i===0) return `<th>Asset</th>`;
-      const colKey = ["mcap","price","pct"][i-1];
+      const colKey = ["mcap","price","pricepct","pct"][i-1];
+      if(colKey==="pricepct") return `<th>% Change</th>`;
       const arrow  = sortComp.col===colKey ? (sortComp.dir==="desc"?" ↓":" ↑") : " ↕";
       return `<th style="cursor:pointer;user-select:none" onclick="sortCompTable('${colKey}')">${label}${arrow}</th>`;
     }).join("");
 
-    const compRows = rows.map(({coin,mcap,ps,pct})=>{
-      const removable = coin.removable
-        ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
-        : "";
+    const compRows = rows.map(({coin,mcap,ps,pct,priceDelta})=>{
+      const removable = `<button class="remove-btn" onclick="removeExtraCoin('${coin.id}')" title="Remove">✕</button>`;
       const pctStr = pct!==null ? pct.toFixed(2)+"%" : "N/A";
       const tagClass = assetTagClass(coin.id, !!coin.removable);
-      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td>${formatLargeNum(mcap)}</td><td class="td-price">$${fmtPrice(ps)}</td><td>${pctStr}</td></tr>`;
-    }).join("") || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
+      const priceUp  = priceDelta !== null ? priceDelta >= 0 : null;
+      const priceCol = priceUp === null ? "td-price" : (priceUp ? "td-price" : "td-price-down");
+      const pricePctStr = priceDelta !== null
+        ? `<span style="color:${priceDelta>=0?"var(--green)":"var(--pink)"}">${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        : "N/A";
+      return `<tr>
+        <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
+        <td>${formatLargeNum(mcap)}</td>
+        <td class="${priceCol}" style="color:${priceUp===null?"#98ffb6":priceUp?"var(--green)":"var(--pink)"}">
+          $${fmtPrice(ps)}${pctArrow(priceDelta)}
+        </td>
+        <td style="color:${priceDelta!==null?(priceDelta>=0?"var(--green)":"var(--pink)"):"inherit"}">${pricePctStr}</td>
+        <td>${pctStr}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
 
-    // Tri bag
     const bagRowsSorted = [...rows].sort((a,b)=>{
       const v = (r) => sortBag.col==="price" ? r.ps : r.bag;
       return sortBag.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
     });
-    const thBag = ["Asset",`${currentSym} Hyp. Price`,"Bag Value"].map((label,i)=>{
+    const thBag = ["Asset",`${currentSym} Hyp. Price`,"Bag Value","Bag Gain/Loss"].map((label,i)=>{
       if(i===0) return `<th>Asset</th>`;
+      if(i===3)  return `<th>Bag Gain/Loss</th>`;
       const colKey = ["price","bag"][i-1];
       const arrow  = sortBag.col===colKey ? (sortBag.dir==="desc"?" ↓":" ↑") : " ↕";
       return `<th style="cursor:pointer;user-select:none" onclick="sortBagTable('${colKey}')">${label}${arrow}</th>`;
     }).join("");
 
-    const bagRows = bagRowsSorted.map(({coin,ps,bag})=>{
-      const removable = coin.removable
-        ? `<button onclick="removeExtraCoin('${coin.id}')" style="margin-left:8px;background:none;border:none;color:var(--pink);cursor:pointer;font-size:14px;padding:0" title="Remove">✕</button>`
-        : "";
+    const bagRows = bagRowsSorted.map(({coin,ps,bag,priceDelta})=>{
+      const removable = `<button class="remove-btn" onclick="removeExtraCoin('${coin.id}')" title="Remove">✕</button>`;
       const tagClass = assetTagClass(coin.id, !!coin.removable);
-      return `<tr><td><span class="${tagClass}">${coin.label}</span>${removable}</td><td class="td-price-hyp">$${fmtPrice(ps)}</td><td class="td-bag">${formatLargeNum(bag)}</td></tr>`;
-    }).join("") || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+      const bagUp = priceDelta !== null ? priceDelta >= 0 : null;
+      // Bag gain/loss in $ and %
+      const currentBagVal = currentPrice ? currentBagAmount * currentPrice : null;
+      const bagDelta = currentBagVal ? (bag - currentBagVal) : null;
+      const bagDeltaStr = bagDelta !== null
+        ? `<span style="color:${bagDelta>=0?"var(--green)":"var(--pink)"}">${bagDelta>=0?"+":""}${formatLargeNum(Math.abs(bagDelta))} (${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%)${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        : "N/A";
+      return `<tr>
+        <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
+        <td class="td-price-hyp">$${fmtPrice(ps)}</td>
+        <td class="td-bag" style="color:${bagUp===null?"#98ffb6":bagUp?"var(--green)":"var(--pink)"}">${formatLargeNum(bag)}${pctArrow(priceDelta)}</td>
+        <td>${bagDeltaStr}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
 
     const compBody = document.getElementById("comp-table-body");
     const bagBody  = document.getElementById("bag-table-body");
@@ -993,11 +1090,56 @@
     const bagHead  = document.getElementById("bag-table-head");
     if(compBody) compBody.innerHTML = compRows;
     if(bagBody)  bagBody.innerHTML  = bagRows;
-    if(compHead) compHead.innerHTML = thComp;
-    if(bagHead)  bagHead.innerHTML  = thBag;
+    if(compHead) compHead.innerHTML = `<tr>${thComp}</tr>`;
+    if(bagHead)  bagHead.innerHTML  = `<tr>${thBag}</tr>`;
+  }
+
+  // ── PERF TABLE (table 3) ──────────────────────────────────────
+  function renderPerfTable() {
+    const wrap = document.getElementById("perf-table-wrap");
+    if(!wrap) return;
+    const allCoins = [{id:currentCoinId, label:currentSym, removable:false}, ...compareCoins, ...extraCompareCoins]
+      .filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i);
+
+    const rows = allCoins.map(coin=>{
+      const p = currentPerfData[coin.id];
+      if(!p) return null;
+      return {coin, p7d:p.p7d, p30d:p.p30d, p90d:p.p90d};
+    }).filter(Boolean);
+
+    rows.sort((a,b)=>{
+      const v=(r)=>sortPerf.col==="7d"?r.p7d??-999:sortPerf.col==="30d"?r.p30d??-999:r.p90d??-999;
+      return sortPerf.dir==="desc"?v(b)-v(a):v(a)-v(b);
+    });
+
+    const mkTh=(label,col)=>{
+      const arrow=sortPerf.col===col?(sortPerf.dir==="desc"?" ↓":" ↑"):" ↕";
+      return `<th style="cursor:pointer;user-select:none" onclick="sortPerfTable('${col}')">${label}${arrow}</th>`;
+    };
+
+    const thead=`<tr><th>Asset</th>${mkTh("7D Perf.","7d")}${mkTh("30D Perf.","30d")}${mkTh("90D Perf.","90d")}</tr>`;
+    const tbody=rows.map(({coin,p7d,p30d,p90d})=>{
+      const removable = coin.id===currentCoinId ? "" :
+        `<button class="remove-btn" onclick="removeExtraCoin('${coin.id}')" title="Remove">✕</button>`;
+      const tagClass = coin.id===currentCoinId ? "asset-tag" : assetTagClass(coin.id,!!coin.removable);
+      return `<tr>
+        <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
+        <td>${p7d!==null?fmtPct(p7d):"N/A"}</td>
+        <td>${p30d!==null?fmtPct(p30d):"N/A"}</td>
+        <td>${p90d!==null?fmtPct(p90d):"N/A"}</td>
+      </tr>`;
+    }).join("")||`<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
+
+    wrap.innerHTML=`<div class="table-wrap"><table><thead id="perf-table-head">${thead}</thead><tbody id="perf-table-body">${tbody}</tbody></table></div>`;
+  }
+
+  function sortPerfTable(col){
+    sortPerf=sortPerf.col===col&&sortPerf.dir==="desc"?{col,dir:"asc"}:{col,dir:"desc"};
+    renderPerfTable();
   }
 
   function sortCompTable(col){
+    if(col==="pricepct") return; // not sortable, just display
     sortComp = sortComp.col===col && sortComp.dir==="desc" ? {col,dir:"asc"} : {col,dir:"desc"};
     renderTables();
   }
@@ -1007,8 +1149,12 @@
   }
 
   function removeExtraCoin(id){
+    // Remove from fixed list too
+    const fixedIdx = compareCoins.findIndex(c=>c.id===id);
+    if(fixedIdx !== -1) compareCoins.splice(fixedIdx, 1);
     extraCompareCoins=extraCompareCoins.filter(c=>c.id!==id);
     renderTables();
+    renderPerfTable();
   }
 
   async function loadData(coinId,coinName,coinSymbol){
@@ -1032,11 +1178,11 @@
 
     try{
       const [markets,detail,globalData,fearGreed,perfData]=await Promise.all([
-        cgFetch("/coins/markets",{vs_currency:"usd",ids:allIds,price_change_percentage:"7d,30d"}),
+        cgFetch("/coins/markets",{vs_currency:"usd",ids:allIds,price_change_percentage:"7d,30d,90d"}),
         cgFetch(`/coins/${coinId}`).catch(()=>null),
         cgFetch("/global").catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r=>r.json()).catch(()=>null),
-        cgFetch("/coins/markets",{vs_currency:"usd",ids:[coinId,"bitcoin","ethereum","chainlink"].filter((v,i,a)=>a.indexOf(v)===i).join(","),price_change_percentage:"7d,30d"}).catch(()=>[])
+        cgFetch("/coins/markets",{vs_currency:"usd",ids:[coinId,"bitcoin","ethereum","chainlink"].filter((v,i,a)=>a.indexOf(v)===i).join(","),price_change_percentage:"7d,30d,90d"}).catch(()=>[])
       ]);
 
       const byId=Object.fromEntries(markets.map(c=>[c.id,c]));
@@ -1104,16 +1250,29 @@
       currentSupply  = supply;
       currentMcap    = mcap;
       currentSym     = sym;
+      currentPrice   = price;
+
+      // Build perf data for all coins
+      currentPerfData = {};
+      const allPerfCoins = [...compareCoins, ...extraCompareCoins, {id:coinId}];
+      allPerfCoins.forEach(c=>{
+        const p = perfById[c.id] || byId[c.id];
+        if(p) currentPerfData[c.id] = {
+          p7d:  p.price_change_percentage_7d_in_currency  ?? null,
+          p30d: p.price_change_percentage_30d_in_currency ?? null,
+          p90d: p.price_change_percentage_90d_in_currency ?? null,
+        };
+      });
 
       document.getElementById("comparisons").innerHTML=`
         <div class="table-wrap"><table>
-          <thead id="comp-table-head"><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% of MCAP</th></tr></thead>
+          <thead id="comp-table-head"><tr><th>Asset</th><th>MCAP</th><th>${sym} Price</th><th>% Change</th><th>% of MCAP</th></tr></thead>
           <tbody id="comp-table-body"></tbody>
         </table></div>`;
 
       document.getElementById("bag-simulations").innerHTML=`
         <div class="table-wrap"><table>
-          <thead id="bag-table-head"><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th></tr></thead>
+          <thead id="bag-table-head"><tr><th>Asset</th><th>${sym} Hyp. Price</th><th>Bag Value</th><th>Bag Gain/Loss</th></tr></thead>
           <tbody id="bag-table-body"></tbody>
         </table></div>`;
 
@@ -1135,6 +1294,9 @@
 
       if(bagDisplay) bagDisplay.textContent = `= ${currentBagAmount.toLocaleString()} ${sym}`;
       renderTables();
+      document.getElementById("perf-title").textContent=`Performance Comparison`;
+      document.getElementById("perf-sub").textContent=`7D, 30D and 90D performance — ${sym} vs comparison assets.`;
+      renderPerfTable();
 
       // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
       const addInputEl = document.getElementById("add-compare-input");
@@ -1189,11 +1351,12 @@
         if(addErrEl) addErrEl.style.display="none";
         freshAddBtn.disabled=true; freshAddBtn.textContent="Loading…";
         try{
-          const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:addSelected.id});
+          const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:addSelected.id,price_change_percentage:"7d,30d,90d"});
           if(!res||!res[0]?.market_cap) throw new Error("No market data");
           currentByIdRef[addSelected.id]=res[0];
+          currentPerfData[addSelected.id]={p7d:res[0].price_change_percentage_7d_in_currency??null,p30d:res[0].price_change_percentage_30d_in_currency??null,p90d:res[0].price_change_percentage_90d_in_currency??null};
           extraCompareCoins.push({label:addSelected.symbol.toUpperCase(),id:addSelected.id,removable:true});
-          renderTables();
+          renderTables(); renderPerfTable();
           freshAddInput.value=""; addSelected=null; freshAddBtn.disabled=true;
         }catch{
           if(addErrEl){addErrEl.textContent="Could not fetch data for this token.";addErrEl.style.display="block";}
@@ -1201,6 +1364,73 @@
           freshAddBtn.textContent="+ Add";
         }
       });
+
+      // ── Footer search bar (mobile UX) — mirrors top bar
+      const footerInput  = document.getElementById("add-compare-input-footer");
+      const footerAC     = document.getElementById("add-compare-autocomplete-footer");
+      const footerBtn    = document.getElementById("add-compare-btn-footer");
+      const footerErr    = document.getElementById("add-compare-error-footer");
+      if(footerInput && footerBtn) {
+        const freshFooterInput = footerInput.cloneNode(true);
+        footerInput.parentNode.replaceChild(freshFooterInput, footerInput);
+        const freshFooterBtn = footerBtn.cloneNode(true);
+        footerBtn.parentNode.replaceChild(freshFooterBtn, footerBtn);
+        freshFooterBtn.disabled = true;
+        let fResults=[], fDebounce=null, fSelected=null;
+        freshFooterInput.addEventListener("input",()=>{
+          clearTimeout(fDebounce);
+          const q=freshFooterInput.value.trim();
+          if(q.length<2){footerAC.classList.remove("open");footerAC.innerHTML="";return;}
+          fDebounce=setTimeout(async()=>{
+            try{
+              const data=await cgFetch("/search",{query:q});
+              fResults=(data.coins||[]).slice(0,6);
+              if(!fResults.length){footerAC.classList.remove("open");return;}
+              footerAC.innerHTML=fResults.map((c,i)=>`
+                <div class="autocomplete-item" data-i="${i}">
+                  <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
+                  <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
+                  <span class="autocomplete-name">${c.name}</span>
+                </div>`).join("");
+              footerAC.querySelectorAll(".autocomplete-item").forEach((el,i)=>{
+                el.addEventListener("mousedown",e=>{
+                  e.preventDefault();
+                  fSelected=fResults[i];
+                  freshFooterInput.value=`${fSelected.name} (${fSelected.symbol.toUpperCase()})`;
+                  freshFooterBtn.disabled=false;
+                  footerAC.classList.remove("open");
+                });
+              });
+              footerAC.classList.add("open");
+            }catch{footerAC.classList.remove("open");}
+          },320);
+        });
+        freshFooterBtn.addEventListener("click",async()=>{
+          if(!fSelected)return;
+          const existingIds=[...compareCoins,...extraCompareCoins].map(c=>c.id);
+          if(existingIds.includes(fSelected.id)||fSelected.id===coinId){
+            if(footerErr){footerErr.textContent="Already in comparison.";footerErr.style.display="block";}
+            return;
+          }
+          if(footerErr)footerErr.style.display="none";
+          freshFooterBtn.disabled=true;freshFooterBtn.textContent="Loading…";
+          try{
+            const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:fSelected.id,price_change_percentage:"7d,30d,90d"});
+            if(!res||!res[0]?.market_cap)throw new Error("No market data");
+            currentByIdRef[fSelected.id]=res[0];
+            currentPerfData[fSelected.id]={
+              p7d:res[0].price_change_percentage_7d_in_currency??null,
+              p30d:res[0].price_change_percentage_30d_in_currency??null,
+              p90d:res[0].price_change_percentage_90d_in_currency??null,
+            };
+            extraCompareCoins.push({label:fSelected.symbol.toUpperCase(),id:fSelected.id,removable:true});
+            renderTables(); renderPerfTable();
+            freshFooterInput.value="";fSelected=null;freshFooterBtn.disabled=true;
+          }catch{
+            if(footerErr){footerErr.textContent="Could not fetch data.";footerErr.style.display="block";}
+          }finally{freshFooterBtn.textContent="+ Add";}
+        });
+      }
 
       // ── Market Context (points 2 & 3)
       let ctx="";
@@ -1240,15 +1470,24 @@
         </div><br>`;
       }
 
-      // 7D perf table
-      const perfTokens=[{id:coinId,label:sym},{id:"bitcoin",label:"BTC"},{id:"ethereum",label:"ETH"},{id:"chainlink",label:"LINK"}].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i);
-      const perfRows=perfTokens.filter(t=>perfById[t.id]).map(t=>`<tr><td><span class="asset-tag">${t.label}</span></td><td>${fmtPct(perfById[t.id].price_change_percentage_7d_in_currency)}</td></tr>`).join("");
-      const perfRows30=perfTokens.filter(t=>perfById[t.id]).map(t=>{
-        const p=perfById[t.id];
-        const p30=p.price_change_percentage_30d_in_currency;
-        return `<tr><td><span class="asset-tag ${assetTagClass2(t.id)}">${t.label}</span></td><td>${fmtPct(p.price_change_percentage_7d_in_currency)}</td><td>${p30!=null?fmtPct(p30):"N/A"}</td></tr>`;
-      }).join("");
-      if(perfRows30)ctx+=`<div class="table-wrap"><table><tr><th>Asset</th><th>7D Perf.</th><th>30D Perf.</th></tr>${perfRows30}</table></div><br>`;
+      // ── Liquidations (Coinglass public data)
+      try {
+        const liqRes = await fetch("https://open-api.coinglass.com/public/v2/liquidation_info",
+          {headers:{"accept":"application/json"}}).catch(()=>null);
+        if(liqRes && liqRes.ok) {
+          const liqJson = await liqRes.json();
+          const d = liqJson?.data;
+          if(d) {
+            ctx+=`<div class="metrics" style="margin-bottom:16px">
+              <div class="metric"><span class="metric-label">Total Liquidations 24h</span><span class="metric-value accent-gold">${formatLargeNum(d.totalLiquidationUsd||d.total||null)}</span></div>
+              <div class="metric"><span class="metric-label">Long Liquidations 24h</span><span class="metric-value" style="color:var(--pink)">${formatLargeNum(d.longLiquidationUsd||d.longLiq||null)}</span></div>
+              <div class="metric"><span class="metric-label">Short Liquidations 24h</span><span class="metric-value" style="color:var(--green)">${formatLargeNum(d.shortLiquidationUsd||d.shortLiq||null)}</span></div>
+            </div>`;
+          }
+        }
+      } catch(e) {
+        // Liquidation data unavailable — skip silently
+      }
 
       // Valuation zone
       if(tvMetric&&mcap){
@@ -1269,6 +1508,51 @@
       monitorBtn.disabled=false;
     }
   }
+
+  // ── SCREENSHOT (html2canvas + watermark) ──────────────────────
+  function takeScreenshot(sectionId, filename) {
+    const section = document.getElementById(sectionId);
+    if(!section) return;
+    if(typeof html2canvas === "undefined") {
+      const s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+      s.onload=()=>doScreenshot(section, filename);
+      document.head.appendChild(s);
+    } else {
+      doScreenshot(section, filename);
+    }
+  }
+
+  async function doScreenshot(el, filename) {
+    const canvas = await html2canvas(el, {
+      backgroundColor: "#060818",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    // Add watermark band at bottom
+    const finalCanvas = document.createElement("canvas");
+    const bandH = 52;
+    finalCanvas.width  = canvas.width;
+    finalCanvas.height = canvas.height + bandH;
+    const ctx = finalCanvas.getContext("2d");
+    ctx.drawImage(canvas, 0, 0);
+    // Band
+    ctx.fillStyle = "#060818";
+    ctx.fillRect(0, canvas.height, canvas.width, bandH);
+    // Watermark text
+    ctx.fillStyle = "rgba(126,224,255,0.55)";
+    ctx.font = `bold ${Math.round(finalCanvas.width * 0.018)}px 'Arial', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("monitorthesituation.top", finalCanvas.width/2, canvas.height + bandH/2);
+    // Download
+    const link = document.createElement("a");
+    link.download = `mts-${filename}-${Date.now()}.png`;
+    link.href = finalCanvas.toDataURL("image/png");
+    link.click();
+  }
+
   </script>
 
   <footer class="site-footer">
