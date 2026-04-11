@@ -1727,34 +1727,19 @@
     t._timer = setTimeout(()=>{ t.style.opacity="0"; }, 2800);
   }
 
-async function doScreenshot(el, filename) {
-  // Active watermark sur le vrai DOM
+  async function doScreenshot(el, filename) {
   el.classList.add("screenshot-mode");
-
-  // laisse le temps au style de s’appliquer
   await new Promise(r => setTimeout(r, 50));
 
-  // Screenshot du vrai élément
-  const canvas = await html2canvas(el, {
-    backgroundColor: "#060818",
-    scale: 2,
-    useCORS: true,
-    logging: false,
-  });
-
-  // Désactive watermark
-  el.classList.remove("screenshot-mode");
-
-  // Download
-  finishDownload(canvas, filename);
-}
+  try {
+    const canvas = await html2canvas(el, {
+      backgroundColor: "#060818",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
 
     finishDownload(canvas, filename);
-  } finally {
-    // Nettoyage
-    document.body.removeChild(clone);
-  }
-}
   } finally {
     el.classList.remove("screenshot-mode");
   }
