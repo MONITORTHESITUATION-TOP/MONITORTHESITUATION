@@ -444,17 +444,28 @@
   display: none;
 }
 
-.wm-text-monitor,
-.wm-text-sit {
+.wm-text-full {
   display: none;
 }
 
-.wm-text-full {
+.wm-text-monitor {
   font-family: 'Rajdhani', monospace;
   font-size: 21px;
   font-weight: 700;
+  color: #22c55e;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.wm-text-sit {
+  font-family: 'Rajdhani', monospace;
+  font-size: 21px;
+  font-weight: 600;
   color: rgba(255,255,255,0.78);
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   white-space: nowrap;
   flex-shrink: 0;
@@ -625,7 +636,10 @@
     </section>
 
     <section class="section" id="metrics-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge"><span class="wm-text-full">monitorthesituation.top</span></div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge">
+  <span class="wm-text-monitor">MONITOR</span>
+  <span class="wm-text-sit">THESITUATION.TOP</span>
+</div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
       <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
@@ -633,7 +647,10 @@
     </section>
 
     <section class="section" id="comp-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Others' Market Cap</span></div><div class="wm-badge"><span class="wm-text-full">monitorthesituation.top</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Others' Market Cap</span></div><div class="wm-badge">
+  <span class="wm-text-monitor">MONITOR</span>
+  <span class="wm-text-sit">THESITUATION.TOP</span>
+</div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
 
