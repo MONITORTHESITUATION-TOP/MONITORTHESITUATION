@@ -414,42 +414,51 @@
     }
     .screenshot-btn:hover { background: rgba(126,224,255,0.18); color:#fff; }
     .section-titlebar-row {
-      display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 8px;
-      margin-bottom: 6px;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
 
+.wm-badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 14px 0 0;
+  margin-left: auto;
+  opacity: 0.52;
+  transition: opacity 0.2s;
+  overflow: hidden;
+  min-width: 0;
+  text-align: right;
+}
 
-    /* ═══════════════ WATERMARK BADGE ═══════════════ */
-    .wm-badge {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 11px;
-      padding: 0 16px;
-      opacity: 0.52;
-      transition: opacity 0.2s;
-      overflow: hidden;
-      min-width: 0;
-    }
-    .wm-badge:hover { opacity: 0.72; }
-    .wm-icon {
-      height: 40px;
-      width: auto;
-      flex-shrink: 0;
-    }
-    .wm-text-monitor {
-      font-family: 'Rajdhani', monospace;
-      font-size: 21px;
-      font-weight: 700;
-      color: #22c55e;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .wm-text-sit {
+.wm-badge:hover {
+  opacity: 0.72;
+}
+
+.wm-icon {
+  display: none;
+}
+
+.wm-text-monitor,
+.wm-text-sit {
+  display: none;
+}
+
+.wm-text-full {
+  font-family: 'Rajdhani', monospace;
+  font-size: 21px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.78);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
       font-family: 'Rajdhani', monospace;
       font-size: 21px;
       font-weight: 600;
@@ -616,7 +625,7 @@
     </section>
 
     <section class="section" id="metrics-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA1NCIgZmlsbD0ibm9uZSI+CiAgPCEtLSBTY3JlZW4gYmV6ZWwgLS0+CiAgPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQwIiByeD0iNCIgcnk9IjQiIAogICAgc3Ryb2tlPSJyZ2JhKDEyNiwyMjQsMjU1LDAuOSkiIHN0cm9rZS13aWR0aD0iMi41IiBmaWxsPSJyZ2JhKDYsOCwyNCwwLjYpIi8+CiAgPCEtLSBTY3JlZW4gaW5uZXIgLS0+CiAgPHJlY3QgeD0iNyIgeT0iNyIgd2lkdGg9IjUwIiBoZWlnaHQ9IjMwIiByeD0iMiIgcnk9IjIiIAogICAgZmlsbD0icmdiYSgxMjYsMjI0LDI1NSwwLjA4KSIgc3Ryb2tlPSJyZ2JhKDEyNiwyMjQsMjU1LDAuMzUpIiBzdHJva2Utd2lkdGg9IjEiLz4KICA8IS0tIFNjcmVlbiBnbG93IGxpbmVzIC0tPgogIDxsaW5lIHgxPSI3IiB5MT0iMTUiIHgyPSI1NyIgeTI9IjE1IiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDxsaW5lIHgxPSI3IiB5MT0iMjIiIHgyPSI1NyIgeTI9IjIyIiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDxsaW5lIHgxPSI3IiB5MT0iMjkiIHgyPSI1NyIgeTI9IjI5IiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDwhLS0gTmVjayAtLT4KICA8cmVjdCB4PSIyNiIgeT0iNDIiIHdpZHRoPSIxMiIgaGVpZ2h0PSI2IiByeD0iMSIgCiAgICBmaWxsPSJyZ2JhKDEyNiwyMjQsMjU1LDAuNSkiLz4KICA8IS0tIEJhc2UgLS0+CiAgPHJlY3QgeD0iMTgiIHk9IjQ4IiB3aWR0aD0iMjgiIGhlaWdodD0iNCIgcng9IjIiIAogICAgZmlsbD0icmdiYSgxMjYsMjI0LDI1NSwwLjcpIi8+CiAgPCEtLSBQb3dlciBkb3QgLS0+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzNSIgcj0iMS41IiBmaWxsPSJyZ2JhKDEyNiwyMjQsMjU1LDAuNykiLz4KPC9zdmc+" class="wm-icon" alt=""/><span class="wm-text-monitor">MONITOR</span><span class="wm-text-sit">THESITUATION.TOP</span></div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge"><span class="wm-text-full">monitorthesituation.top</span></div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
       <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
@@ -624,7 +633,7 @@
     </section>
 
     <section class="section" id="comp-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Others' Market Cap</span></div><div class="wm-badge"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA1NCIgZmlsbD0ibm9uZSI+CiAgPCEtLSBTY3JlZW4gYmV6ZWwgLS0+CiAgPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQwIiByeD0iNCIgcnk9IjQiIAogICAgc3Ryb2tlPSJyZ2JhKDEyNiwyMjQsMjU1LDAuOSkiIHN0cm9rZS13aWR0aD0iMi41IiBmaWxsPSJyZ2JhKDYsOCwyNCwwLjYpIi8+CiAgPCEtLSBTY3JlZW4gaW5uZXIgLS0+CiAgPHJlY3QgeD0iNyIgeT0iNyIgd2lkdGg9IjUwIiBoZWlnaHQ9IjMwIiByeD0iMiIgcnk9IjIiIAogICAgZmlsbD0icmdiYSgxMjYsMjI0LDI1NSwwLjA4KSIgc3Ryb2tlPSJyZ2JhKDEyNiwyMjQsMjU1LDAuMzUpIiBzdHJva2Utd2lkdGg9IjEiLz4KICA8IS0tIFNjcmVlbiBnbG93IGxpbmVzIC0tPgogIDxsaW5lIHgxPSI3IiB5MT0iMTUiIHgyPSI1NyIgeTI9IjE1IiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDxsaW5lIHgxPSI3IiB5MT0iMjIiIHgyPSI1NyIgeTI9IjIyIiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDxsaW5lIHgxPSI3IiB5MT0iMjkiIHgyPSI1NyIgeTI9IjI5IiBzdHJva2U9InJnYmEoMTI2LDIyNCwyNTUsMC4xMikiIHN0cm9rZS13aWR0aD0iMSIvPgogIDwhLS0gTmVjayAtLT4KICA8cmVjdCB4PSIyNiIgeT0iNDIiIHdpZHRoPSIxMiIgaGVpZ2h0PSI2IiByeD0iMSIgCiAgICBmaWxsPSJyZ2JhKDEyNiwyMjQsMjU1LDAuNSkiLz4KICA8IS0tIEJhc2UgLS0+CiAgPHJlY3QgeD0iMTgiIHk9IjQ4IiB3aWR0aD0iMjgiIGhlaWdodD0iNCIgcng9IjIiIAogICAgZmlsbD0icmdiYSgxMjYsMjI0LDI1NSwwLjcpIi8+CiAgPCEtLSBQb3dlciBkb3QgLS0+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzNSIgcj0iMS41IiBmaWxsPSJyZ2JhKDEyNiwyMjQsMjU1LDAuNykiLz4KPC9zdmc+" class="wm-icon" alt=""/><span class="wm-text-monitor">MONITOR</span><span class="wm-text-sit">THESITUATION.TOP</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Others' Market Cap</span></div><div class="wm-badge"><span class="wm-text-full">monitorthesituation.top</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
 
