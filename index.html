@@ -583,7 +583,7 @@
     </section>
 
     <section class="section" id="comp-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Market Cap</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Others' Market Cap</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
 
@@ -1046,7 +1046,7 @@
       const upColor  = "#98ffb6";
       const downColor = "var(--pink)";
       const pricePctStr = priceDelta !== null
-        ? `<span style="color:${priceDelta>=0?upColor:downColor}">${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        ? `${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%${pctArrow(priceDelta)}`
         : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
@@ -1054,7 +1054,7 @@
         <td class="${priceCol}" style="color:${priceUp===null?"#98ffb6":priceUp?upColor:downColor}">
           $${fmtPrice(ps)}${pctArrow(priceDelta)}
         </td>
-        <td style="color:${priceDelta!==null?(priceDelta>=0?upColor:downColor):"inherit"}">${pricePctStr}</td>
+        <td>${pricePctStr}</td>
         <td>${pctStr}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
@@ -1083,7 +1083,7 @@
       const currentBagVal = currentPrice ? currentBagAmount * currentPrice : null;
       const bagDelta = currentBagVal ? (bag - currentBagVal) : null;
       const bagDeltaStr = bagDelta !== null
-        ? `<span style="color:${bagDelta>=0?upColor:downColor}">${bagDelta>=0?"+":"-"}$${formatLargeNum(Math.abs(bagDelta))} (${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%)${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        ? `${bagDelta>=0?"+":"-"}${formatLargeNum(Math.abs(bagDelta))} (${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%)${pctArrow(priceDelta)}`
         : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
@@ -1173,8 +1173,8 @@
     document.getElementById("hero-price-label").textContent=`Live ${sym} Price`;
     document.getElementById("hero-price").textContent="Loading…";
     document.getElementById("metrics-sub").textContent=`Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
-    document.getElementById("comp-title").textContent=`${sym} Price at Market Cap`;
-      document.getElementById("comp-sub").textContent=`What would ${sym} cost at each asset's market cap?`;
+    document.getElementById("comp-title").textContent=`${sym} Price at Others' Market Cap`;
+      document.getElementById("comp-sub").textContent=`What would ${sym} be worth if it had each asset's market cap?`;
     setLoading(); monitorBtn.disabled=true; setSearchError("");
 
     // On lance renderChart APRÈS avoir récupéré detail pour lui passer les tickers CG
@@ -1479,45 +1479,24 @@
         </div><br>`;
       }
 
-      // ── Liquidations 24h — via Binance public API (no CORS, no key)
+      // ── Market Derivatives & Liquidation Proxy ──────────────────
+      // CoinGecko /derivatives via our proxy — always CORS-safe
       try {
-        // Binance public endpoints for BTC & ETH liquidation stats (no auth needed)
-        const [liqBtc, liqEth] = await Promise.all([
-          fetch("https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT").then(r=>r.json()).catch(()=>null),
-          fetch("https://fapi.binance.com/fapi/v1/openInterest?symbol=ETHUSDT").then(r=>r.json()).catch(()=>null),
-        ]);
-        // Coinglass liquidation stats endpoint (public, CORS-friendly alias)
-        const liqStats = await fetch("https://open-api.coinglass.com/public/v2/liquidation_info", {mode:"cors"}).then(r=>r.ok?r.json():null).catch(()=>null);
-
-        if(liqStats?.data) {
-          const d = liqStats.data;
-          const total = d.totalLiquidationUsd ?? d.total ?? null;
-          const longs = d.longLiquidationUsd ?? d.buyLiquidationUsd ?? null;
-          const shorts = d.shortLiquidationUsd ?? d.sellLiquidationUsd ?? null;
+        const derivRes = await cgFetch("/derivatives").catch(()=>null);
+        const btcPrice = byId["bitcoin"]?.current_price || 0;
+        if(derivRes && Array.isArray(derivRes) && derivRes.length > 0 && btcPrice > 0) {
+          const totalOI  = derivRes.reduce((s,d)=>s+(Number(d.open_interest_btc)||0), 0);
+          const totalVol = derivRes.reduce((s,d)=>s+(Number(d.trade_volume_24h_btc)||0), 0);
+          const topExchanges = [...new Set(derivRes.map(d=>d.market).filter(Boolean))].slice(0,5).join(", ");
+          // Estimate long/short split from price change proxies
+          // (CoinGecko doesn't give liquidation breakdown — we use OI as best proxy)
           ctx+=`<div class="metrics" style="margin-bottom:16px">
-            <div class="metric"><span class="metric-label">Total Liq. 24h</span><span class="metric-value accent-gold">${total!==null?formatLargeNum(total):"N/A"}</span></div>
-            <div class="metric"><span class="metric-label">Long Liq. 24h</span><span class="metric-value" style="color:var(--pink)">${longs!==null?formatLargeNum(longs):"N/A"}</span></div>
-            <div class="metric"><span class="metric-label">Short Liq. 24h</span><span class="metric-value" style="color:#98ffb6">${shorts!==null?formatLargeNum(shorts):"N/A"}</span></div>
+            <div class="metric"><span class="metric-label">Deriv. Open Interest</span><span class="metric-value accent-gold">${formatLargeNum(totalOI*btcPrice)}</span></div>
+            <div class="metric"><span class="metric-label">Deriv. Volume 24h</span><span class="metric-value">${formatLargeNum(totalVol*btcPrice)}</span></div>
+            <div class="metric"><span class="metric-label">Active Deriv. Markets</span><span class="metric-value">${derivRes.length.toLocaleString()}</span></div>
           </div>`;
-        } else {
-          // Fallback: CoinGecko derivatives as proxy for open interest
-          const derivRes = await cgFetch("/derivatives").catch(()=>null);
-          if(derivRes && Array.isArray(derivRes) && derivRes.length > 0) {
-            const totalOI = derivRes.reduce((s,d)=>s+(d.open_interest_btc||0),0);
-            const totalVol = derivRes.reduce((s,d)=>s+(d.trade_volume_24h_btc||0),0);
-            const btcPrice = byId["bitcoin"]?.current_price || 0;
-            if(totalOI > 0 && btcPrice > 0) {
-              ctx+=`<div class="metrics" style="margin-bottom:16px">
-                <div class="metric"><span class="metric-label">Deriv. Open Interest</span><span class="metric-value accent-gold">${formatLargeNum(totalOI*btcPrice)}</span></div>
-                <div class="metric"><span class="metric-label">Deriv. Volume 24h</span><span class="metric-value">${formatLargeNum(totalVol*btcPrice)}</span></div>
-                <div class="metric"><span class="metric-label">Active Markets</span><span class="metric-value">${derivRes.length.toLocaleString()}</span></div>
-              </div>`;
-            }
-          }
         }
-      } catch(e) {
-        // Liquidation data unavailable
-      }
+      } catch(e) { /* derivatives unavailable */ }
 
       // Valuation zone
       if(tvMetric&&mcap){
@@ -1606,7 +1585,7 @@
       ctx.fillText("monitorthesituation.top", finalCanvas.width/2, canvas.height + bandH/2);
       finishDownload(finalCanvas, filename);
     };
-    wm.src = "https://raw.githubusercontent.com/hcftrize/MONITORTHESITUATION/main/assets/WATERMARK.png";
+    wm.src = "https://raw.githubusercontent.com/hcftrize/MONITORTHESITUATION/dev/assets/WATERMARK.png";
     return; // async path — finishDownload called inside wm.onload
     finishDownload(finalCanvas, filename);
   }
