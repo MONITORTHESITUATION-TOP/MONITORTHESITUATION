@@ -1728,42 +1728,30 @@
   }
 
 async function doScreenshot(el, filename) {
-  // 🔥 1. Clone invisible de la section
-  const clone = el.cloneNode(true);
+  // Active watermark sur le vrai DOM
+  el.classList.add("screenshot-mode");
 
-  clone.classList.add("screenshot-mode");
-
-  // hors écran
-  clone.style.position = "fixed";
-  clone.style.top = "-10000px";
-  clone.style.left = "0";
-  clone.style.pointerEvents = "none";
-  clone.style.zIndex = "-1";
-
-  // même largeur que l’original
-  const rect = el.getBoundingClientRect();
-  clone.style.width = rect.width + "px";
-  clone.style.maxWidth = "none";
-
-  document.body.appendChild(clone);
-
-  // laisse le temps au DOM
+  // laisse le temps au style de s’appliquer
   await new Promise(r => setTimeout(r, 50));
 
-  try {
-    // 📸 screenshot du clone (pas du vrai DOM)
-    const canvas = await html2canvas(clone, {
-      backgroundColor: "#060818",
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      width: Math.ceil(rect.width),
-      height: Math.ceil(clone.scrollHeight)
-    });
+  // Screenshot du vrai élément
+  const canvas = await html2canvas(el, {
+    backgroundColor: "#060818",
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  });
+
+  // Désactive watermark
+  el.classList.remove("screenshot-mode");
+
+  // Download
+  finishDownload(canvas, filename);
+}
 
     finishDownload(canvas, filename);
   } finally {
-    // 🧹 nettoyage
+    // Nettoyage
     document.body.removeChild(clone);
   }
 }
