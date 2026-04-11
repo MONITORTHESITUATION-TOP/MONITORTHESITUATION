@@ -617,6 +617,21 @@
       </div>
       <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
       <div class="footer-note">Formula: your bag size × hypothetical price at same market cap.</div>
+      <!-- Mobile search bar below bag table -->
+      <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
+        <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+            <input type="text" id="add-compare-input-bag" placeholder="Add any crypto to compare…"
+              autocomplete="off" spellcheck="false"
+              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+            <div class="autocomplete-list" id="add-compare-autocomplete-bag"></div>
+          </div>
+          <button id="add-compare-btn-bag"
+            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+            disabled>+ Add</button>
+        </div>
+        <div id="add-compare-error-bag" style="margin-top:6px;font-size:13px;color:var(--pink);display:none"></div>
+      </div>
     </div>
     </section>
 
@@ -920,7 +935,7 @@
     }catch{}
   });
 
-  function fmtPct(v){const n=Number(v);const c=n>=0?"var(--green)":"var(--pink)";return `<span style="color:${c}">${n>=0?"+":""}${n.toFixed(2)}%</span>`;}
+  function fmtPct(v){const n=Number(v);const c=n>=0?"#98ffb6":"var(--pink)";return `<span style="color:${c}">${n>=0?"+":""}${n.toFixed(2)}%</span>`;}
 
   // Arrondi intelligent selon la grandeur du prix (point 5)
   function fmtPrice(v) {
@@ -1003,7 +1018,7 @@
   function pctArrow(val) {
     if(val===null||val===undefined) return "";
     const up = val >= 0;
-    const col = up ? "var(--green)" : "var(--pink)";
+    const col = up ? "#98ffb6" : "var(--pink)";
     const arr = up ? "↑" : "↓";
     return `<span style="color:${col};font-size:18px;line-height:1;margin-left:3px;vertical-align:middle">${arr}</span>`;
   }
@@ -1104,6 +1119,33 @@
   }
 
   // ── PERF TABLE (table 3) ──────────────────────────────────────
+  // ── 90D perf: computed from market_chart (free CoinGecko endpoint)
+  async function fetch90dPerf(coinId) {
+    try {
+      const data = await cgFetch(`/coins/${coinId}/market_chart`, {
+        vs_currency: "usd", days: "90", interval: "daily"
+      });
+      const prices = data?.prices;
+      if(!prices || prices.length < 2) return null;
+      const first = prices[0][1];
+      const last  = prices[prices.length - 1][1];
+      if(!first || first === 0) return null;
+      return ((last - first) / first) * 100;
+    } catch(e) { return null; }
+  }
+
+  async function load90dForAll() {
+    const allCoins = [{id:currentCoinId}, ...compareCoins, ...extraCompareCoins]
+      .filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i);
+    await Promise.all(allCoins.map(async coin=>{
+      if(currentPerfData[coin.id] && currentPerfData[coin.id].p90d !== null) return; // already have it
+      const p90d = await fetch90dPerf(coin.id);
+      if(currentPerfData[coin.id]) currentPerfData[coin.id].p90d = p90d;
+      else currentPerfData[coin.id] = {p7d:null, p30d:null, p90d};
+    }));
+    renderPerfTable();
+  }
+
   function renderPerfTable() {
     const wrap = document.getElementById("perf-table-wrap");
     if(!wrap) return;
@@ -1131,11 +1173,12 @@
       const removable = coin.id===currentCoinId ? "" :
         `<button class="remove-btn" onclick="removeExtraCoin('${coin.id}')" title="Remove">✕</button>`;
       const tagClass = coin.id===currentCoinId ? "asset-tag" : assetTagClass(coin.id,!!coin.removable);
+      const p90str = p90d !== null && p90d !== undefined ? fmtPct(p90d) : `<span style="color:var(--muted);font-size:12px">loading…</span>`;
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
         <td>${p7d!==null?fmtPct(p7d):"N/A"}</td>
         <td>${p30d!==null?fmtPct(p30d):"N/A"}</td>
-        <td>${p90d!==null?fmtPct(p90d):"N/A"}</td>
+        <td>${p90str}</td>
       </tr>`;
     }).join("")||`<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
 
@@ -1306,6 +1349,7 @@
       document.getElementById("perf-title").textContent=`Performance Comparison`;
       document.getElementById("perf-sub").textContent=`7D, 30D and 90D performance — ${sym} vs comparison assets.`;
       renderPerfTable();
+      load90dForAll(); // async — fills in 90D perf after initial render
 
       // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
       const addInputEl = document.getElementById("add-compare-input");
@@ -1366,6 +1410,7 @@
           currentPerfData[addSelected.id]={p7d:res[0].price_change_percentage_7d_in_currency??null,p30d:res[0].price_change_percentage_30d_in_currency??null,p90d:res[0].price_change_percentage_90d_in_currency??null};
           extraCompareCoins.push({label:addSelected.symbol.toUpperCase(),id:addSelected.id,removable:true});
           renderTables(); renderPerfTable();
+          load90dForAll();
           freshAddInput.value=""; addSelected=null; freshAddBtn.disabled=true;
         }catch{
           if(addErrEl){addErrEl.textContent="Could not fetch data for this token.";addErrEl.style.display="block";}
@@ -1430,16 +1475,20 @@
             currentPerfData[fSelected.id]={
               p7d:res[0].price_change_percentage_7d_in_currency??null,
               p30d:res[0].price_change_percentage_30d_in_currency??null,
-              p90d:res[0].price_change_percentage_90d_in_currency??null,
+              p90d:null, // will be loaded by load90dForAll
             };
             extraCompareCoins.push({label:fSelected.symbol.toUpperCase(),id:fSelected.id,removable:true});
             renderTables(); renderPerfTable();
+            load90dForAll();
             freshFooterInput.value="";fSelected=null;freshFooterBtn.disabled=true;
           }catch{
             if(footerErr){footerErr.textContent="Could not fetch data.";footerErr.style.display="block";}
           }finally{freshFooterBtn.textContent="+ Add";}
         });
       }
+
+      // ── Bag footer search bar
+      wireSearchBar("add-compare-input-bag","add-compare-autocomplete-bag","add-compare-btn-bag","add-compare-error-bag");
 
       // ── Market Context (points 2 & 3)
       let ctx="";
@@ -1479,24 +1528,7 @@
         </div><br>`;
       }
 
-      // ── Market Derivatives & Liquidation Proxy ──────────────────
-      // CoinGecko /derivatives via our proxy — always CORS-safe
-      try {
-        const derivRes = await cgFetch("/derivatives").catch(()=>null);
-        const btcPrice = byId["bitcoin"]?.current_price || 0;
-        if(derivRes && Array.isArray(derivRes) && derivRes.length > 0 && btcPrice > 0) {
-          const totalOI  = derivRes.reduce((s,d)=>s+(Number(d.open_interest_btc)||0), 0);
-          const totalVol = derivRes.reduce((s,d)=>s+(Number(d.trade_volume_24h_btc)||0), 0);
-          const topExchanges = [...new Set(derivRes.map(d=>d.market).filter(Boolean))].slice(0,5).join(", ");
-          // Estimate long/short split from price change proxies
-          // (CoinGecko doesn't give liquidation breakdown — we use OI as best proxy)
-          ctx+=`<div class="metrics" style="margin-bottom:16px">
-            <div class="metric"><span class="metric-label">Deriv. Open Interest</span><span class="metric-value accent-gold">${formatLargeNum(totalOI*btcPrice)}</span></div>
-            <div class="metric"><span class="metric-label">Deriv. Volume 24h</span><span class="metric-value">${formatLargeNum(totalVol*btcPrice)}</span></div>
-            <div class="metric"><span class="metric-label">Active Deriv. Markets</span><span class="metric-value">${derivRes.length.toLocaleString()}</span></div>
-          </div>`;
-        }
-      } catch(e) { /* derivatives unavailable */ }
+      // Liquidation data removed (no reliable CORS-free source)
 
       // Valuation zone
       if(tvMetric&&mcap){
@@ -1530,6 +1562,77 @@
     } else {
       doScreenshot(section, filename);
     }
+  }
+
+  // ── Generic search bar wiring (reused by perf footer & bag footer)
+  function wireSearchBar(inputId, acId, btnId, errId) {
+    const inputEl = document.getElementById(inputId);
+    const acEl    = document.getElementById(acId);
+    const btnEl   = document.getElementById(btnId);
+    const errEl   = document.getElementById(errId);
+    if(!inputEl || !btnEl) return;
+
+    const freshInput = inputEl.cloneNode(true);
+    inputEl.parentNode.replaceChild(freshInput, inputEl);
+    const freshBtn = btnEl.cloneNode(true);
+    btnEl.parentNode.replaceChild(freshBtn, btnEl);
+    freshBtn.disabled = true;
+
+    let wResults=[], wDebounce=null, wSelected=null;
+    freshInput.addEventListener("input",()=>{
+      clearTimeout(wDebounce);
+      const q=freshInput.value.trim();
+      if(q.length<2){acEl.classList.remove("open");acEl.innerHTML="";return;}
+      wDebounce=setTimeout(async()=>{
+        try{
+          const data=await cgFetch("/search",{query:q});
+          wResults=(data.coins||[]).slice(0,6);
+          if(!wResults.length){acEl.classList.remove("open");return;}
+          acEl.innerHTML=wResults.map((c,i)=>`
+            <div class="autocomplete-item" data-i="${i}">
+              <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
+              <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
+              <span class="autocomplete-name">${c.name}</span>
+            </div>`).join("");
+          acEl.querySelectorAll(".autocomplete-item").forEach((el,i)=>{
+            el.addEventListener("mousedown",e=>{
+              e.preventDefault();
+              wSelected=wResults[i];
+              freshInput.value=`${wSelected.name} (${wSelected.symbol.toUpperCase()})`;
+              freshBtn.disabled=false;
+              acEl.classList.remove("open");
+            });
+          });
+          acEl.classList.add("open");
+        }catch{acEl.classList.remove("open");}
+      },320);
+    });
+    freshBtn.addEventListener("click",async()=>{
+      if(!wSelected)return;
+      const existingIds=[...compareCoins,...extraCompareCoins].map(c=>c.id);
+      if(existingIds.includes(wSelected.id)||wSelected.id===currentCoinId){
+        if(errEl){errEl.textContent="Already in comparison.";errEl.style.display="block";}
+        return;
+      }
+      if(errEl)errEl.style.display="none";
+      freshBtn.disabled=true;freshBtn.textContent="Loading…";
+      try{
+        const res=await cgFetch("/coins/markets",{vs_currency:"usd",ids:wSelected.id,price_change_percentage:"7d,30d,90d"});
+        if(!res||!res[0]?.market_cap)throw new Error("No market data");
+        currentByIdRef[wSelected.id]=res[0];
+        currentPerfData[wSelected.id]={
+          p7d:res[0].price_change_percentage_7d_in_currency??null,
+          p30d:res[0].price_change_percentage_30d_in_currency??null,
+          p90d:null,
+        };
+        extraCompareCoins.push({label:wSelected.symbol.toUpperCase(),id:wSelected.id,removable:true});
+        renderTables(); renderPerfTable();
+        load90dForAll();
+        freshInput.value="";wSelected=null;freshBtn.disabled=true;
+      }catch{
+        if(errEl){errEl.textContent="Could not fetch data.";errEl.style.display="block";}
+      }finally{freshBtn.textContent="+ Add";}
+    });
   }
 
   function showToast(msg) {
