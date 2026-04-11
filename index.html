@@ -429,11 +429,15 @@
   justify-content: flex-end;
   padding: 0 14px 0 0;
   margin-left: auto;
-  opacity: 0.52;
-  transition: opacity 0.2s;
+  opacity: 0;
+  transition: none;
   overflow: hidden;
   min-width: 0;
   text-align: right;
+}
+
+    .screenshot-mode .wm-badge {
+  opacity: 0.52;
 }
 
 .wm-badge:hover {
@@ -1727,17 +1731,22 @@
   }
 
   async function doScreenshot(el, filename) {
-    // Hide watermark badge during screenshot (it's already visible in HTML)
-    const wmBadge = el.querySelector('.wm-badge');
-    // Screenshot = container as-is, watermark visible in titlebar
+  el.classList.add("screenshot-mode");
+  await new Promise(r => setTimeout(r, 50));
+
+  try {
     const canvas = await html2canvas(el, {
       backgroundColor: "#060818",
       scale: 2,
       useCORS: true,
       logging: false,
     });
+
     finishDownload(canvas, filename);
+  } finally {
+    el.classList.remove("screenshot-mode");
   }
+}
 
   async function finishDownload(finalCanvas, filename) {
     try {
