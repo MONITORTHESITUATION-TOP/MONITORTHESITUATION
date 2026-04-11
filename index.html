@@ -404,12 +404,12 @@
     /* ── SCREENSHOT BUTTON ── */
     .screenshot-btn {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px;
+      padding: 8px 18px;
       background: rgba(126,224,255,0.06);
       border: 1px solid rgba(126,224,255,0.22);
       color: var(--cyan); font-family: 'Rajdhani', monospace;
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1px; cursor: pointer;
+      font-size: 15px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.2px; cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
     .screenshot-btn:hover { background: rgba(126,224,255,0.18); color:#fff; }
@@ -583,11 +583,11 @@
     </section>
 
     <section class="section" id="comp-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price Comparison & Bag Simulation</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price at Market Cap</span></div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
-      <p class="section-sub" id="comp-sub">Hypothetical price if this token's market cap matched each asset's — and the value of your bag at that price.</p>
+      <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
 
-      <!-- Add bar — au-dessus des tableaux, affecte les deux -->
+      <!-- Add bar -->
       <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px;flex-wrap:wrap">
         <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
           <input type="text" id="add-compare-input" placeholder="Add any crypto to compare…"
@@ -600,24 +600,23 @@
           disabled>+ Add</button>
       </div>
       <div id="add-compare-error" style="margin-bottom:10px;font-size:13px;color:var(--pink);display:none"></div>
-
-      <!-- Price comparison table -->
       <div id="comparisons"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+    </div>
+    </section>
 
-      <!-- Bag simulation — même section, séparée visuellement -->
-      <div style="margin-top:32px;padding-top:26px;border-top:1px solid var(--border)">
-        <div class="section-titlebar" style="margin-bottom:6px"><span class="section-title">Bag Value Simulation</span></div>
-        <p class="section-sub" style="margin:0 0 16px">Hypothetical value of your bag at each simulated target price.</p>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-          <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
-          <input type="number" id="bag-amount-input" value="1" min="1"
-            style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
-            placeholder="Enter your bag…"/>
-          <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
-        </div>
-        <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-        <div class="footer-note">Formula: your bag size × hypothetical price at same market cap.</div>
+    <section class="section" id="bag-section">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Bag Value Simulation</span></div><button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button></div>
+      <div class="section-body">
+      <p class="section-sub">Hypothetical value of your bag at each simulated target price.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
+        <input type="number" id="bag-amount-input" value="1" min="1"
+          style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
+          placeholder="Enter your bag…"/>
+        <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
       </div>
+      <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+      <div class="footer-note">Formula: your bag size × hypothetical price at same market cap.</div>
     </div>
     </section>
 
@@ -980,6 +979,8 @@
   let currentPrice = null;
   let sortComp  = {col:"mcap", dir:"desc"};
   let sortBag   = {col:"price", dir:"desc"};
+  // sortComp cols: mcap | price | pct | pricepct
+  // sortBag cols: price | bag | bagdelta
   let sortPerf  = {col:"7d", dir:"desc"};
   let currentPerfData = {}; // id -> {p7d, p30d, p90d}
 
@@ -1004,7 +1005,7 @@
     const up = val >= 0;
     const col = up ? "var(--green)" : "var(--pink)";
     const arr = up ? "↑" : "↓";
-    return `<span style="color:${col};font-size:13px;margin-left:4px">${arr}</span>`;
+    return `<span style="color:${col};font-size:18px;line-height:1;margin-left:3px;vertical-align:middle">${arr}</span>`;
   }
 
   function renderTables() {
@@ -1022,14 +1023,16 @@
     });
 
     rows.sort((a,b) => {
-      const v = (r) => sortComp.col==="mcap" ? r.mcap : sortComp.col==="price" ? r.ps : r.pct||0;
+      const v = (r) => sortComp.col==="mcap" ? r.mcap
+                     : sortComp.col==="price" ? r.ps
+                     : sortComp.col==="pricepct" ? (r.priceDelta??-9999)
+                     : r.pct||0;
       return sortComp.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
     });
 
     const thComp = ["Asset","MCAP",`${currentSym} Price`,"% Change","% of MCAP"].map((label,i)=>{
       if(i===0) return `<th>Asset</th>`;
       const colKey = ["mcap","price","pricepct","pct"][i-1];
-      if(colKey==="pricepct") return `<th>% Change</th>`;
       const arrow  = sortComp.col===colKey ? (sortComp.dir==="desc"?" ↓":" ↑") : " ↕";
       return `<th style="cursor:pointer;user-select:none" onclick="sortCompTable('${colKey}')">${label}${arrow}</th>`;
     }).join("");
@@ -1040,28 +1043,32 @@
       const tagClass = assetTagClass(coin.id, !!coin.removable);
       const priceUp  = priceDelta !== null ? priceDelta >= 0 : null;
       const priceCol = priceUp === null ? "td-price" : (priceUp ? "td-price" : "td-price-down");
+      const upColor  = "#98ffb6";
+      const downColor = "var(--pink)";
       const pricePctStr = priceDelta !== null
-        ? `<span style="color:${priceDelta>=0?"var(--green)":"var(--pink)"}">${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        ? `<span style="color:${priceDelta>=0?upColor:downColor}">${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
         : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
         <td>${formatLargeNum(mcap)}</td>
-        <td class="${priceCol}" style="color:${priceUp===null?"#98ffb6":priceUp?"var(--green)":"var(--pink)"}">
+        <td class="${priceCol}" style="color:${priceUp===null?"#98ffb6":priceUp?upColor:downColor}">
           $${fmtPrice(ps)}${pctArrow(priceDelta)}
         </td>
-        <td style="color:${priceDelta!==null?(priceDelta>=0?"var(--green)":"var(--pink)"):"inherit"}">${pricePctStr}</td>
+        <td style="color:${priceDelta!==null?(priceDelta>=0?upColor:downColor):"inherit"}">${pricePctStr}</td>
         <td>${pctStr}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
 
+    const currentBagValForSort = currentPrice ? currentBagAmount * currentPrice : 0;
     const bagRowsSorted = [...rows].sort((a,b)=>{
-      const v = (r) => sortBag.col==="price" ? r.ps : r.bag;
+      const v = (r) => sortBag.col==="price" ? r.ps
+                     : sortBag.col==="bagdelta" ? (r.bag - currentBagValForSort)
+                     : r.bag;
       return sortBag.dir==="desc" ? v(b)-v(a) : v(a)-v(b);
     });
     const thBag = ["Asset",`${currentSym} Hyp. Price`,"Bag Value","Bag Gain/Loss"].map((label,i)=>{
       if(i===0) return `<th>Asset</th>`;
-      if(i===3)  return `<th>Bag Gain/Loss</th>`;
-      const colKey = ["price","bag"][i-1];
+      const colKey = ["price","bag","bagdelta"][i-1];
       const arrow  = sortBag.col===colKey ? (sortBag.dir==="desc"?" ↓":" ↑") : " ↕";
       return `<th style="cursor:pointer;user-select:none" onclick="sortBagTable('${colKey}')">${label}${arrow}</th>`;
     }).join("");
@@ -1070,16 +1077,18 @@
       const removable = `<button class="remove-btn" onclick="removeExtraCoin('${coin.id}')" title="Remove">✕</button>`;
       const tagClass = assetTagClass(coin.id, !!coin.removable);
       const bagUp = priceDelta !== null ? priceDelta >= 0 : null;
-      // Bag gain/loss in $ and %
+      const upColor = "#98ffb6";
+      const downColor = "var(--pink)";
+      // Bag gain/loss in $ and % — with explicit sign
       const currentBagVal = currentPrice ? currentBagAmount * currentPrice : null;
       const bagDelta = currentBagVal ? (bag - currentBagVal) : null;
       const bagDeltaStr = bagDelta !== null
-        ? `<span style="color:${bagDelta>=0?"var(--green)":"var(--pink)"}">${bagDelta>=0?"+":""}${formatLargeNum(Math.abs(bagDelta))} (${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%)${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
+        ? `<span style="color:${bagDelta>=0?upColor:downColor}">${bagDelta>=0?"+":"-"}$${formatLargeNum(Math.abs(bagDelta))} (${priceDelta>=0?"+":""}${priceDelta.toFixed(2)}%)${pctArrow(priceDelta).replace(/<span.*?>(.*?)<\/span>/,"$1")}</span>`
         : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${coin.label}</span></td>
         <td class="td-price-hyp">$${fmtPrice(ps)}</td>
-        <td class="td-bag" style="color:${bagUp===null?"#98ffb6":bagUp?"var(--green)":"var(--pink)"}">${formatLargeNum(bag)}${pctArrow(priceDelta)}</td>
+        <td class="td-bag" style="color:${bagUp===null?upColor:bagUp?upColor:downColor}">${formatLargeNum(bag)}${pctArrow(priceDelta)}</td>
         <td>${bagDeltaStr}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="4" style="color:var(--muted)">No data.</td></tr>`;
@@ -1139,7 +1148,6 @@
   }
 
   function sortCompTable(col){
-    if(col==="pricepct") return; // not sortable, just display
     sortComp = sortComp.col===col && sortComp.dir==="desc" ? {col,dir:"asc"} : {col,dir:"desc"};
     renderTables();
   }
@@ -1165,7 +1173,8 @@
     document.getElementById("hero-price-label").textContent=`Live ${sym} Price`;
     document.getElementById("hero-price").textContent="Loading…";
     document.getElementById("metrics-sub").textContent=`Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
-    document.getElementById("comp-sub").textContent=`Hypothetical ${sym} price if ${coinName} market cap matched each asset's — and the value of your bag at that price.`;
+    document.getElementById("comp-title").textContent=`${sym} Price at Market Cap`;
+      document.getElementById("comp-sub").textContent=`What would ${sym} cost at each asset's market cap?`;
     setLoading(); monitorBtn.disabled=true; setSearchError("");
 
     // On lance renderChart APRÈS avoir récupéré detail pour lui passer les tickers CG
@@ -1182,7 +1191,7 @@
         cgFetch(`/coins/${coinId}`).catch(()=>null),
         cgFetch("/global").catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r=>r.json()).catch(()=>null),
-        cgFetch("/coins/markets",{vs_currency:"usd",ids:[coinId,"bitcoin","ethereum","chainlink"].filter((v,i,a)=>a.indexOf(v)===i).join(","),price_change_percentage:"7d,30d,90d"}).catch(()=>[])
+        cgFetch("/coins/markets",{vs_currency:"usd",ids:allIds,price_change_percentage:"7d,30d,90d"}).catch(()=>[])
       ]);
 
       const byId=Object.fromEntries(markets.map(c=>[c.id,c]));
@@ -1240,7 +1249,7 @@
         <div class="metric"><span class="metric-label">1M Change</span><span class="metric-value">${pct30d!==null?fmtPct(pct30d):"N/A"}</span></div>
         <div class="metric"><span class="metric-label">ATH</span><span class="metric-value">$${fmtPrice(ath)}</span></div>
         ${athBlock}
-        ${daysSinceAth!==null?`<div class="metric"><span class="metric-label">Last ATH</span><span class="metric-value" style="font-size:22px;color:var(--muted)">${daysSinceAth}d ago</span></div>`:""}
+        ${daysSinceAth!==null?`<div class="metric"><span class="metric-label">Last ATH</span><span class="metric-value" style="color:var(--muted)">${daysSinceAth}d ago</span></div>`:""}
         ${tvBlock}
       </div>`;
 
@@ -1252,11 +1261,11 @@
       currentSym     = sym;
       currentPrice   = price;
 
-      // Build perf data for all coins
+      // Build perf data for all coins — use byId which has 90d data
       currentPerfData = {};
       const allPerfCoins = [...compareCoins, ...extraCompareCoins, {id:coinId}];
       allPerfCoins.forEach(c=>{
-        const p = perfById[c.id] || byId[c.id];
+        const p = byId[c.id] || perfById[c.id];
         if(p) currentPerfData[c.id] = {
           p7d:  p.price_change_percentage_7d_in_currency  ?? null,
           p30d: p.price_change_percentage_30d_in_currency ?? null,
@@ -1470,23 +1479,44 @@
         </div><br>`;
       }
 
-      // ── Liquidations (Coinglass public data)
+      // ── Liquidations 24h — via Binance public API (no CORS, no key)
       try {
-        const liqRes = await fetch("https://open-api.coinglass.com/public/v2/liquidation_info",
-          {headers:{"accept":"application/json"}}).catch(()=>null);
-        if(liqRes && liqRes.ok) {
-          const liqJson = await liqRes.json();
-          const d = liqJson?.data;
-          if(d) {
-            ctx+=`<div class="metrics" style="margin-bottom:16px">
-              <div class="metric"><span class="metric-label">Total Liquidations 24h</span><span class="metric-value accent-gold">${formatLargeNum(d.totalLiquidationUsd||d.total||null)}</span></div>
-              <div class="metric"><span class="metric-label">Long Liquidations 24h</span><span class="metric-value" style="color:var(--pink)">${formatLargeNum(d.longLiquidationUsd||d.longLiq||null)}</span></div>
-              <div class="metric"><span class="metric-label">Short Liquidations 24h</span><span class="metric-value" style="color:var(--green)">${formatLargeNum(d.shortLiquidationUsd||d.shortLiq||null)}</span></div>
-            </div>`;
+        // Binance public endpoints for BTC & ETH liquidation stats (no auth needed)
+        const [liqBtc, liqEth] = await Promise.all([
+          fetch("https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT").then(r=>r.json()).catch(()=>null),
+          fetch("https://fapi.binance.com/fapi/v1/openInterest?symbol=ETHUSDT").then(r=>r.json()).catch(()=>null),
+        ]);
+        // Coinglass liquidation stats endpoint (public, CORS-friendly alias)
+        const liqStats = await fetch("https://open-api.coinglass.com/public/v2/liquidation_info", {mode:"cors"}).then(r=>r.ok?r.json():null).catch(()=>null);
+
+        if(liqStats?.data) {
+          const d = liqStats.data;
+          const total = d.totalLiquidationUsd ?? d.total ?? null;
+          const longs = d.longLiquidationUsd ?? d.buyLiquidationUsd ?? null;
+          const shorts = d.shortLiquidationUsd ?? d.sellLiquidationUsd ?? null;
+          ctx+=`<div class="metrics" style="margin-bottom:16px">
+            <div class="metric"><span class="metric-label">Total Liq. 24h</span><span class="metric-value accent-gold">${total!==null?formatLargeNum(total):"N/A"}</span></div>
+            <div class="metric"><span class="metric-label">Long Liq. 24h</span><span class="metric-value" style="color:var(--pink)">${longs!==null?formatLargeNum(longs):"N/A"}</span></div>
+            <div class="metric"><span class="metric-label">Short Liq. 24h</span><span class="metric-value" style="color:#98ffb6">${shorts!==null?formatLargeNum(shorts):"N/A"}</span></div>
+          </div>`;
+        } else {
+          // Fallback: CoinGecko derivatives as proxy for open interest
+          const derivRes = await cgFetch("/derivatives").catch(()=>null);
+          if(derivRes && Array.isArray(derivRes) && derivRes.length > 0) {
+            const totalOI = derivRes.reduce((s,d)=>s+(d.open_interest_btc||0),0);
+            const totalVol = derivRes.reduce((s,d)=>s+(d.trade_volume_24h_btc||0),0);
+            const btcPrice = byId["bitcoin"]?.current_price || 0;
+            if(totalOI > 0 && btcPrice > 0) {
+              ctx+=`<div class="metrics" style="margin-bottom:16px">
+                <div class="metric"><span class="metric-label">Deriv. Open Interest</span><span class="metric-value accent-gold">${formatLargeNum(totalOI*btcPrice)}</span></div>
+                <div class="metric"><span class="metric-label">Deriv. Volume 24h</span><span class="metric-value">${formatLargeNum(totalVol*btcPrice)}</span></div>
+                <div class="metric"><span class="metric-label">Active Markets</span><span class="metric-value">${derivRes.length.toLocaleString()}</span></div>
+              </div>`;
+            }
           }
         }
       } catch(e) {
-        // Liquidation data unavailable — skip silently
+        // Liquidation data unavailable
       }
 
       // Valuation zone
@@ -1523,6 +1553,20 @@
     }
   }
 
+  function showToast(msg) {
+    let t = document.getElementById("mts-toast");
+    if(!t) {
+      t = document.createElement("div");
+      t.id = "mts-toast";
+      t.style.cssText = "position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#060818;border:1px solid rgba(126,224,255,0.35);color:#7ee0ff;font-family:Rajdhani,monospace;font-size:15px;font-weight:700;letter-spacing:1px;padding:12px 28px;z-index:9999;pointer-events:none;transition:opacity 0.4s";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = "1";
+    clearTimeout(t._timer);
+    t._timer = setTimeout(()=>{ t.style.opacity="0"; }, 2800);
+  }
+
   async function doScreenshot(el, filename) {
     const canvas = await html2canvas(el, {
       backgroundColor: "#060818",
@@ -1540,17 +1584,53 @@
     // Band
     ctx.fillStyle = "#060818";
     ctx.fillRect(0, canvas.height, canvas.width, bandH);
-    // Watermark text
-    ctx.fillStyle = "rgba(126,224,255,0.55)";
-    ctx.font = `bold ${Math.round(finalCanvas.width * 0.018)}px 'Arial', sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("monitorthesituation.top", finalCanvas.width/2, canvas.height + bandH/2);
-    // Download
-    const link = document.createElement("a");
-    link.download = `mts-${filename}-${Date.now()}.png`;
-    link.href = finalCanvas.toDataURL("image/png");
-    link.click();
+    // Watermark image
+    const wm = new Image();
+    wm.crossOrigin = "anonymous";
+    wm.onload = function() {
+      const wmW = Math.min(wm.naturalWidth, finalCanvas.width * 0.5);
+      const wmH = wmW * (wm.naturalHeight / wm.naturalWidth);
+      const wmX = (finalCanvas.width - wmW) / 2;
+      const wmY = canvas.height + (bandH - wmH) / 2;
+      ctx.globalAlpha = 0.7;
+      ctx.drawImage(wm, wmX, wmY, wmW, wmH);
+      ctx.globalAlpha = 1.0;
+      finishDownload(finalCanvas, filename);
+    };
+    wm.onerror = function() {
+      // Fallback to text if image fails
+      ctx.fillStyle = "rgba(126,224,255,0.55)";
+      ctx.font = `bold ${Math.round(finalCanvas.width * 0.018)}px 'Arial', sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("monitorthesituation.top", finalCanvas.width/2, canvas.height + bandH/2);
+      finishDownload(finalCanvas, filename);
+    };
+    wm.src = "https://raw.githubusercontent.com/hcftrize/MONITORTHESITUATION/main/assets/WATERMARK.png";
+    return; // async path — finishDownload called inside wm.onload
+    finishDownload(finalCanvas, filename);
+  }
+
+  async function finishDownload(finalCanvas, filename) {
+    try {
+      finalCanvas.toBlob(async (blob) => {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({"image/png": blob})
+          ]);
+          showToast("📋 Screenshot copied to clipboard!");
+        } catch(e) {
+          // Fallback: download
+          const link = document.createElement("a");
+          link.download = `mts-${filename}-${Date.now()}.png`;
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          showToast("💾 Screenshot downloaded!");
+        }
+      }, "image/png");
+    } catch(e) {
+      showToast("⚠ Screenshot failed.");
+    }
   }
 
   </script>
