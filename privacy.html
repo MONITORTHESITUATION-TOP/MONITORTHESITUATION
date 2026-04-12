@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Privacy & Transparency — Monitor The Situation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Monitor The Situation is a free, independent crypto monitoring tool. No data collection, no ads, no affiliation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --border: rgba(126,224,255,0.12);
+      --cyan: rgba(126,224,255,1);
+      --cyan-dim: rgba(126,224,255,0.5);
+      --cyan-faint: rgba(126,224,255,0.07);
+      --gold: rgba(255,211,107,1);
+      --gold-dim: rgba(255,211,107,0.5);
+      --muted: rgba(255,255,255,0.35);
+      --text: rgba(255,255,255,0.85);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', monospace;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    .site-header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-text {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .site-nav a {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 12px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .site-nav a:hover {
+      color: var(--cyan);
+      border-color: var(--border);
+    }
+
+    .site-nav a.nav-support {
+      color: var(--gold-dim);
+      border: 1px solid rgba(255,211,107,0.22);
+      background: rgba(255,211,107,0.04);
+      padding: 4px 14px;
+    }
+
+    .site-nav a.nav-support:hover {
+      background: rgba(255,211,107,0.1);
+      color: #fff;
+    }
+
+    /* ── MAIN ── */
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 32px 96px;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-header {
+      margin-bottom: 56px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 32px;
+    }
+
+    .page-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      margin-bottom: 12px;
+    }
+
+    .page-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .page-title span {
+      color: var(--cyan);
+    }
+
+    .page-sub {
+      margin-top: 14px;
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── BLOCKS ── */
+    .block {
+      margin-bottom: 40px;
+      padding: 28px 32px;
+      background: var(--cyan-faint);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .block::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--cyan);
+      opacity: 0.5;
+    }
+
+    .block-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 14px;
+    }
+
+    .block p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+
+    .block p:last-child {
+      margin-bottom: 0;
+    }
+
+    .block ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .block ul li {
+      font-size: 15px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+      padding: 5px 0;
+      padding-left: 18px;
+      position: relative;
+    }
+
+    .block ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--cyan-dim);
+      font-size: 12px;
+    }
+
+    /* highlight row */
+    .block.highlight {
+      background: rgba(255,211,107,0.04);
+      border-color: rgba(255,211,107,0.18);
+    }
+
+    .block.highlight::before {
+      background: var(--gold);
+    }
+
+    .block.highlight .block-title {
+      color: var(--gold);
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-copy {
+      font-family: 'Rajdhani', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.15);
+      text-transform: uppercase;
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .footer-nav a {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      text-decoration: none;
+      padding: 3px 8px;
+      transition: color 0.2s;
+    }
+
+    .footer-nav a:hover {
+      color: var(--cyan-dim);
+    }
+
+    @media (max-width: 700px) {
+      .site-header { padding: 14px 18px; }
+      .wrap { padding: 40px 18px 64px; }
+      .block { padding: 20px 20px; }
+      .site-footer { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <a href="/" class="site-header-logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">Monitor The Situation</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/app">App</a>
+      <a href="/support" class="nav-support">Support</a>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main class="wrap">
+
+    <div class="page-header">
+      <p class="page-label">Transparency</p>
+      <h1 class="page-title">Privacy &amp; <span>About</span></h1>
+      <p class="page-sub">What this site is, who made it, and what it does with your data.</p>
+    </div>
+
+    <div class="block highlight">
+      <p class="block-title">The short version</p>
+      <p>Monitor The Situation collects zero data. No tracking. No ads. No affiliation fees. It's free, and it will stay free.</p>
+    </div>
+
+    <div class="block">
+      <p class="block-title">Who is behind this</p>
+      <p>This site is built and maintained by a single individual, as a personal project, for other individual users. There is no company, no team, no investor behind it.</p>
+      <p>Monitor The Situation is an independent tool created out of a genuine interest in crypto market monitoring. Nothing more.</p>
+    </div>
+
+    <div class="block">
+      <p class="block-title">Data & Privacy</p>
+      <ul>
+        <li>No personal data is collected, stored or transmitted.</li>
+        <li>No account or registration is required to use this site.</li>
+        <li>All inputs (token quantities, price targets) are processed locally in your browser only and are never sent to any server.</li>
+        <li>The screenshot feature copies a snapshot of the simulation table to your local clipboard only. Nothing is uploaded.</li>
+        <li>No cookies are set for tracking purposes.</li>
+        <li>No third-party analytics or tracking scripts are loaded.</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <p class="block-title">Business model</p>
+      <ul>
+        <li>This site is completely free to use.</li>
+        <li>There are no advertisements.</li>
+        <li>There are no paid affiliate links. Any links to external platforms or projects are purely informational and carry no financial relationship.</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <p class="block-title">External services</p>
+      <p>Market data is fetched from public APIs (CoinGecko). Charts are rendered via TradingView widgets. These services operate under their own terms and privacy policies. Monitor The Situation does not share any user data with them.</p>
+    </div>
+
+    <div class="block">
+      <p class="block-title">Contact</p>
+      <p>Questions or concerns? Use the <a href="/support" style="color:var(--gold-dim);text-decoration:none;">support page</a>.</p>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <span class="footer-copy">© Monitor The Situation — Independent & free</span>
+    <nav class="footer-nav">
+      <a href="/">Home</a>
+      <a href="/app">App</a>
+      <a href="/support">Support</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+  </footer>
+
+</body>
+</html>
