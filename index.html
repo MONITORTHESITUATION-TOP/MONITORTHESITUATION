@@ -1349,12 +1349,13 @@ async function load90dForAll() {
   }
 
   function removeExtraCoin(id){
-    // Remove from fixed list too
     const fixedIdx = compareCoins.findIndex(c=>c.id===id);
     if(fixedIdx !== -1) compareCoins.splice(fixedIdx, 1);
     extraCompareCoins=extraCompareCoins.filter(c=>c.id!==id);
+    ratioExtraCoins=ratioExtraCoins.filter(c=>c.id!==id);
     renderTables();
     renderPerfTable();
+    renderRatioTable();
   }
 
   async function loadData(coinId,coinName,coinSymbol){
