@@ -1484,12 +1484,18 @@ async function load90dForAll() {
       if(bagInput){
         const freshBag = bagInput.cloneNode(true);
         bagInput.parentNode.replaceChild(freshBag, bagInput);
-        freshBag.addEventListener("input",()=>{
+      freshBag.addEventListener("input",()=>{
           const v = parseFloat(freshBag.value);
           if(!isNaN(v) && v > 0){
             currentBagAmount = v;
             if(bagDisplay) bagDisplay.textContent = `= ${Number(v).toLocaleString()} ${currentSym||'token'}${v===1?'':'s'}`;
+            // Sync vers Ratio Analysis
+            const ratioBag = document.getElementById("ratio-bag-input");
+            const ratioBagDisp = document.getElementById("ratio-bag-display");
+            if(ratioBag) ratioBag.value = v;
+            if(ratioBagDisp) ratioBagDisp.textContent = `= ${Number(v).toLocaleString()} ${currentSym||'token'}`;
             renderTables();
+            renderRatioTable();
           }
         });
       }
