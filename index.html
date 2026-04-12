@@ -812,7 +812,7 @@
         <div id="add-ratio-error" style="margin-bottom:10px;font-size:13px;color:var(--pink);display:none"></div>
 
         <div id="ratio-table-wrap"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-        <div class="footer-note" style="margin-top:10px">Ratios calculated from USD prices — synthetic pairs, no exchange needed. Gain/loss expressed in units of the compared asset.</div>
+        <div class="footer-note" style="margin-top:10px">Ratios calculated from USD prices — synthetic pairs. Gain/loss expressed in units of the compared asset.</div>
       </div>
     </section>
 
@@ -1282,8 +1282,8 @@
     } catch(e) { return null; }
   }
 
-  async function load90dForAll() {
-    const allCoins = [{id:currentCoinId}, ...compareCoins, ...extraCompareCoins]
+async function load90dForAll() {
+    const allCoins = [{id:currentCoinId}, ...compareCoins, ...extraCompareCoins, ...ratioExtraCoins]
       .filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i);
     await Promise.all(allCoins.map(async coin=>{
       if(currentPerfData[coin.id] && currentPerfData[coin.id].p90d !== null) return; // already have it
@@ -1291,7 +1291,8 @@
       if(currentPerfData[coin.id]) currentPerfData[coin.id].p90d = p90d;
       else currentPerfData[coin.id] = {p7d:null, p30d:null, p90d};
     }));
-    renderPerfTable();
+  renderPerfTable();
+    renderRatioTable();
   }
 
   function renderPerfTable() {
@@ -1731,7 +1732,10 @@
               p30d: res[0].price_change_percentage_30d_in_currency ?? null,
               p90d: res[0].price_change_percentage_90d_in_currency ?? null,
             };
-            ratioExtraCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+           ratioExtraCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+            extraCompareCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+            renderTables();
+            renderPerfTable();
             renderRatioTable();
             load90dForAll();
             freshInput.value = ""; rSelected = null; freshBtn.disabled = true;
@@ -2032,10 +2036,11 @@
       const sign     = deltaB >= 0 ? "+" : "";
       // Format intelligent
       const abs = Math.abs(deltaB);
-      const formatted = abs >= 1000 ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
-                      : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:4})
-                      : abs >= 0.0001 ? abs.toFixed(6)
-                      : abs.toFixed(8);
+        const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
+                        : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
+                        : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
+                        : abs >= 0.01 ? abs.toFixed(3)
+                        : abs.toFixed(4);
       return ` <span style="color:#ffffff;font-size:14px">(${sign}${deltaB < 0 ? "-" : ""}${formatted} ${coin.label})</span>`;
     }
 
@@ -2062,11 +2067,12 @@
         if (priceB == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
         const deltaUSD = bagAmt * priceA * (ratioPct / 100);
         const deltaB   = deltaUSD / priceB;
-        const abs = Math.abs(deltaB);
-        const formatted = abs >= 1000 ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
-                        : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:4})
-                        : abs >= 0.0001 ? abs.toFixed(6)
-                        : abs.toFixed(8);
+       const abs = Math.abs(deltaB);
+        const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
+                        : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
+                        : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
+                        : abs >= 0.01 ? abs.toFixed(3)
+                        : abs.toFixed(4);
         const dsign = deltaB >= 0 ? "+" : "-";
         return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-size:14px">(${dsign}${formatted} ${coin.label})</span>`;
       }
@@ -2092,11 +2098,11 @@
     renderRatioTable();
   }
 
-  function removeRatioCoin(id) {
-    // Retire aussi des listes communes si ajouté via ratio
+ function removeRatioCoin(id) {
     ratioExtraCoins = ratioExtraCoins.filter(c => c.id !== id);
-    // Si c'est un coin des listes communes, on ne le retire pas d'ici
-    // (il faut rester cohérent avec les autres sections)
+    extraCompareCoins = extraCompareCoins.filter(c => c.id !== id);
+    renderTables();
+    renderPerfTable();
     renderRatioTable();
   }
 
