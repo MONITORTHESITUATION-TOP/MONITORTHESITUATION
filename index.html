@@ -692,14 +692,19 @@
     </div>
     </section>
 
-  <section class="section" id="bag-section">
-  <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Portfolio Simulation</span>
-  <button onclick="const t=document.getElementById('privacy-tip');t.style.display=t.style.display==='none'?'inline':'none'" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-left:8px;padding:0;">ⓘ</button>
-  <span id="privacy-tip" style="display:none;font-size:12px;color:var(--muted);margin-left:8px;">Your input is processed locally in your browser only — nothing is stored or transmitted.</span>
-  </div><div class="wm-badge">
-  <span class="wm-text-monitor">MONITOR</span>
-  <span class="wm-text-sit">THESITUATION.TOP</span>
-</div></div><button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button></div>
+ <section class="section" id="bag-section">
+  <div class="section-titlebar-row">
+    <div class="section-titlebar" style="margin:0">
+      <span class="section-title">Portfolio Simulation</span>
+      <button onclick="const t=document.getElementById('privacy-tip');t.style.display=t.style.display==='none'?'inline':'none'" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-left:8px;padding:0;">ⓘ</button>
+      <span id="privacy-tip" style="display:none;font-size:12px;color:var(--muted);margin-left:8px;">Your input is processed locally in your browser only — nothing is stored or transmitted.</span>
+    </div>
+    <div class="wm-badge">
+      <span class="wm-text-monitor">MONITOR</span>
+      <span class="wm-text-sit">THESITUATION.TOP</span>
+    </div>
+  </div>
+  <button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button></div>
   <div class="section-body">
     <p class="section-sub">Estimated value of your holdings at each simulated target price.</p>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
@@ -709,25 +714,25 @@
         placeholder="Enter your bag…"/>
       <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
     </div>
-    <div id="bag-simulations"><div class="chart-placeholder">Select a token and Click Monitor ▶</div></div>
+    <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     <div class="footer-note">Formula: your position size × hypothetical price at same market cap.</div>
-      <!-- Mobile search bar below bag table -->
-      <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
-        <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
-          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
-            <input type="text" id="add-compare-input-bag" placeholder="Add any crypto to compare…"
-              autocomplete="off" spellcheck="false"
-              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
-            <div class="autocomplete-list" id="add-compare-autocomplete-bag"></div>
-          </div>
-          <button id="add-compare-btn-bag"
-            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
-            disabled>+ Add</button>
+    <!-- Mobile search bar below bag table -->
+    <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
+        <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+          <input type="text" id="add-compare-input-bag" placeholder="Add any crypto to compare…"
+            autocomplete="off" spellcheck="false"
+            style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+          <div class="autocomplete-list" id="add-compare-autocomplete-bag"></div>
         </div>
-        <div id="add-compare-error-bag" style="margin-top:6px;font-size:13px;color:var(--pink);display:none"></div>
+        <button id="add-compare-btn-bag"
+          style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+          disabled>+ Add</button>
       </div>
+      <div id="add-compare-error-bag" style="margin-top:6px;font-size:13px;color:var(--pink);display:none"></div>
     </div>
-    </section>
+  </div>
+</section>
 
     <!-- PERF TABLE — Table 3, after bag sim -->
     <section class="section" id="perf-section">
