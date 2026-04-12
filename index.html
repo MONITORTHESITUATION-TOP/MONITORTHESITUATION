@@ -1,3 +1,12 @@
+<!--
+  PRIVACY POLICY — Monitor The Situation
+  Zero data collection. No tracking. No analytics. No ads.
+  No cookies. No account required. No affiliate links.
+  All user inputs processed locally in the browser, never transmitted.
+  Independent personal project. No company, no investors.
+  Market data: CoinGecko public API. Charts: TradingView widgets.
+  Full privacy policy: https://monitorthesituation.top/privacy
+-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -584,6 +593,16 @@
       .site-nav { flex-wrap: wrap; justify-content: center; gap: 4px; }
       .site-nav a { font-size: 12px; padding: 4px 10px; }
     }
+    
+.privacy-note {
+  font-size: 11px;
+  opacity: 0.45;
+  margin-top: 4px;
+  font-style: italic;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Rajdhani', monospace;
+}
+    
   </style>
 
 
@@ -596,6 +615,7 @@
     <nav class="site-nav">
       <a href="/">Home</a>
       <a href="/app">App</a>
+      <a href="/privacy">Privacy</a>
       <a href="/support" class="nav-support">Support the app — keep it free</a>
     </nav>
   </header>
@@ -648,7 +668,7 @@
     </section>
 
     <section class="section" id="comp-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price & Mcap simulation</span></div><div class="wm-badge">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price simulation</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
 </div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
@@ -673,21 +693,22 @@
     </section>
 
     <section class="section" id="bag-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Bag Value Simulation</span></div><div class="wm-badge">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Portfolio Simulation</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
 </div><button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button></div>
       <div class="section-body">
-      <p class="section-sub">Hypothetical value of your bag at each simulated target price.</p>
+      <p class="section-sub">Estimated value of your holdings at each simulated target price.</p>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-        <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your bag size</label>
+        <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)">Your position size</label>
         <input type="number" id="bag-amount-input" value="1" min="1"
           style="width:180px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
           placeholder="Enter your bag…"/>
         <span style="font-size:13px;color:var(--muted)" id="bag-amount-display">= 1 token</span>
       </div>
+        <p class="privacy-note">ⓘ Your input is processed locally in your browser only — nothing is stored or transmitted.</p>
       <div id="bag-simulations"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-      <div class="footer-note">Formula: your bag size × hypothetical price at same market cap.</div>
+      <div class="footer-note">Formula: your position size × hypothetical price at same market cap.</div>
       <!-- Mobile search bar below bag table -->
       <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
         <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
@@ -1294,7 +1315,7 @@
     document.getElementById("hero-price-label").textContent=`Live ${sym} Price`;
     document.getElementById("hero-price").textContent="Loading…";
     document.getElementById("metrics-sub").textContent=`Live snapshot of ${coinName} valuation metrics from CoinGecko.`;
-    document.getElementById("comp-title").textContent=`${sym} Price & Mcap Simulation`;
+    document.getElementById("comp-title").textContent=`${sym} Price Simulation`;
       document.getElementById("comp-sub").textContent=`What would ${sym} be worth if it had each asset's market cap?`;
     setLoading(); monitorBtn.disabled=true; setSearchError("");
 
@@ -1628,7 +1649,11 @@
     }
   }
 
-  // ── SCREENSHOT (html2canvas + watermark) ──────────────────────
+  // — SCREENSHOT (html2canvas + watermark) —————————————————————————————
+// This feature captures only the simulation table currently visible on screen.
+// No data is collected, transmitted or stored externally.
+// The resulting image is copied to the user's local clipboard only,
+// for personal sharing purposes. No upload occurs.
   function takeScreenshot(sectionId, filename) {
     const section = document.getElementById(sectionId);
     if(!section) return;
@@ -1776,6 +1801,7 @@
     <nav class="footer-nav">
       <a href="/">Home</a>
       <a href="/app">App</a>
+      <a href="/privacy">Privacy</a>
       <a href="/support" class="nav-support">Support the app — keep it free</a>
     </nav>
     <p class="footer-copy">© 2026 Monitor The Situation — Live data terminal</p>
