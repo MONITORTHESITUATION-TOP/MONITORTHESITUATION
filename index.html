@@ -5,7 +5,7 @@
   All user inputs processed locally in the browser, never transmitted.
   Independent personal project. No company, no investors.
   Market data: CoinGecko public API. Charts: TradingView widgets.
-  Full privacy policy: https://monitorthesituation.top/privacy
+  Full privacy policy: https://monitorTHESITUATION.TECH/privacy
 -->
 <!DOCTYPE html>
 <html>
@@ -661,18 +661,28 @@
     <section class="section" id="metrics-section">
       <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
-  <span class="wm-text-sit">THESITUATION.TOP</span>
+  <span class="wm-text-sit">THESITUATION.TECH</span>
 </div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
       <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
     </div>
     </section>
+     <section class="section" id="mktctx-section">
+      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Market Context</span></div><div class="wm-badge">
+  <span class="wm-text-monitor">MONITOR</span>
+  <span class="wm-text-sit">THESITUATION.TECH</span>
+</div><button class="screenshot-btn" onclick="takeScreenshot('mktctx-section','market-context')">&#128247; Screenshot</button></div>
+      <div class="section-body">
+      <p class="section-sub">Broader market positioning, relative performance, and valuation signal.</p>
+      <div id="market-context"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+    </div>
+    </section>
 
     <section class="section" id="comp-section">
       <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price simulation</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
-  <span class="wm-text-sit">THESITUATION.TOP</span>
+  <span class="wm-text-sit">THESITUATION.TECH</span>
 </div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
@@ -703,7 +713,7 @@
     </div>
     <div class="wm-badge">
       <span class="wm-text-monitor">MONITOR</span>
-      <span class="wm-text-sit">THESITUATION.TOP</span>
+      <span class="wm-text-sit">THESITUATION.TECH</span>
     </div>
     <button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button>
   </div>
@@ -742,7 +752,7 @@
         <div class="section-titlebar" style="margin:0"><span class="section-title" id="perf-title">Performance Comparison</span></div>
         <div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
-  <span class="wm-text-sit">THESITUATION.TOP</span>
+  <span class="wm-text-sit">THESITUATION.TECH</span>
 </div><button class="screenshot-btn" onclick="takeScreenshot('perf-section','perf')">&#128247; Screenshot</button>
       </div>
       <div class="section-body">
@@ -765,17 +775,47 @@
       </div>
     </div>
     </section>
-
-    <section class="section" id="mktctx-section">
-      <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Market Context</span></div><div class="wm-badge">
-  <span class="wm-text-monitor">MONITOR</span>
-  <span class="wm-text-sit">THESITUATION.TOP</span>
-</div><button class="screenshot-btn" onclick="takeScreenshot('mktctx-section','market-context')">&#128247; Screenshot</button></div>
+    <!-- RATIO ANALYSIS — Section 6 -->
+    <section class="section" id="ratio-section">
+      <div class="section-titlebar-row">
+        <div class="section-titlebar" style="margin:0">
+          <span class="section-title">Ratio Analysis</span>
+        </div>
+        <div class="wm-badge">
+          <span class="wm-text-monitor">MONITOR</span>
+          <span class="wm-text-sit">THESITUATION.TECH</span>
+        </div>
+        <button class="screenshot-btn" onclick="takeScreenshot('ratio-section','ratio-analysis')">&#128247; Screenshot</button>
+      </div>
       <div class="section-body">
-      <p class="section-sub">Broader market positioning, relative performance, and valuation signal.</p>
-      <div id="market-context"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-    </div>
+        <p class="section-sub">Compare the performance of your asset against others and calculate your gains &amp; losses, expressed in compared asset units.</p>
+
+        <!-- Controls row : search + bag -->
+        <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:200px;position:relative">
+            <input type="text" id="add-ratio-input" placeholder="Add any crypto to compare…"
+              autocomplete="off" spellcheck="false"
+              style="width:100%;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--text);font-family:'Trebuchet MS',sans-serif;font-size:15px;outline:none"/>
+            <div class="autocomplete-list" id="add-ratio-autocomplete"></div>
+          </div>
+          <button id="add-ratio-btn"
+            style="padding:10px 22px;background:rgba(126,224,255,0.08);border:1px solid var(--cyan);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;white-space:nowrap"
+            disabled>+ Add</button>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <label style="font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);white-space:nowrap">Position size</label>
+            <input type="number" id="ratio-bag-input" value="1" min="0"
+              style="width:130px;padding:10px 14px;background:rgba(5,14,34,0.8);border:1px solid rgba(126,224,255,0.28);color:var(--cyan);font-family:'Trebuchet MS',sans-serif;font-size:16px;font-weight:700;outline:none"
+              placeholder="Your bag…"/>
+            <span style="font-size:13px;color:var(--muted);white-space:nowrap" id="ratio-bag-display">= 1 token</span>
+          </div>
+        </div>
+        <div id="add-ratio-error" style="margin-bottom:10px;font-size:13px;color:var(--pink);display:none"></div>
+
+        <div id="ratio-table-wrap"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
+        <div class="footer-note" style="margin-top:10px">Ratios calculated from USD prices — synthetic pairs. Gain/loss expressed in units of the compared asset.</div>
+      </div>
     </section>
+
   </div>
 
   <script src="https://s3.tradingview.com/tv.js"></script>
@@ -1242,8 +1282,8 @@
     } catch(e) { return null; }
   }
 
-  async function load90dForAll() {
-    const allCoins = [{id:currentCoinId}, ...compareCoins, ...extraCompareCoins]
+async function load90dForAll() {
+    const allCoins = [{id:currentCoinId}, ...compareCoins, ...extraCompareCoins, ...ratioExtraCoins]
       .filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i);
     await Promise.all(allCoins.map(async coin=>{
       if(currentPerfData[coin.id] && currentPerfData[coin.id].p90d !== null) return; // already have it
@@ -1251,7 +1291,8 @@
       if(currentPerfData[coin.id]) currentPerfData[coin.id].p90d = p90d;
       else currentPerfData[coin.id] = {p7d:null, p30d:null, p90d};
     }));
-    renderPerfTable();
+  renderPerfTable();
+    renderRatioTable();
   }
 
   function renderPerfTable() {
@@ -1308,12 +1349,13 @@
   }
 
   function removeExtraCoin(id){
-    // Remove from fixed list too
     const fixedIdx = compareCoins.findIndex(c=>c.id===id);
     if(fixedIdx !== -1) compareCoins.splice(fixedIdx, 1);
     extraCompareCoins=extraCompareCoins.filter(c=>c.id!==id);
+    ratioExtraCoins=ratioExtraCoins.filter(c=>c.id!==id);
     renderTables();
     renderPerfTable();
+    renderRatioTable();
   }
 
   async function loadData(coinId,coinName,coinSymbol){
@@ -1442,12 +1484,18 @@
       if(bagInput){
         const freshBag = bagInput.cloneNode(true);
         bagInput.parentNode.replaceChild(freshBag, bagInput);
-        freshBag.addEventListener("input",()=>{
+      freshBag.addEventListener("input",()=>{
           const v = parseFloat(freshBag.value);
           if(!isNaN(v) && v > 0){
             currentBagAmount = v;
             if(bagDisplay) bagDisplay.textContent = `= ${Number(v).toLocaleString()} ${currentSym||'token'}${v===1?'':'s'}`;
+            // Sync vers Ratio Analysis
+            const ratioBag = document.getElementById("ratio-bag-input");
+            const ratioBagDisp = document.getElementById("ratio-bag-display");
+            if(ratioBag) ratioBag.value = v;
+            if(ratioBagDisp) ratioBagDisp.textContent = `= ${Number(v).toLocaleString()} ${currentSym||'token'}`;
             renderTables();
+            renderRatioTable();
           }
         });
       }
@@ -1597,6 +1645,115 @@
 
       // ── Bag footer search bar
       wireSearchBar("add-compare-input-bag","add-compare-autocomplete-bag","add-compare-btn-bag","add-compare-error-bag");
+      // ── Ratio section — bag input sync + search bar
+      const ratioBagInput   = document.getElementById("ratio-bag-input");
+      const ratioBagDisplay = document.getElementById("ratio-bag-display");
+      if (ratioBagInput) {
+        // Sync initial depuis currentBagAmount
+        ratioBagInput.value = currentBagAmount;
+        if (ratioBagDisplay) ratioBagDisplay.textContent = `= ${Number(currentBagAmount).toLocaleString()} ${sym}`;
+        const freshRatioBag = ratioBagInput.cloneNode(true);
+        ratioBagInput.parentNode.replaceChild(freshRatioBag, ratioBagInput);
+        freshRatioBag.value = currentBagAmount;
+        freshRatioBag.addEventListener("input", () => {
+          const v = parseFloat(freshRatioBag.value);
+          if (!isNaN(v) && v >= 0) {
+            currentBagAmount = v;
+            // Sync vers le bag principal aussi
+            const mainBag = document.getElementById("bag-amount-input");
+            if (mainBag) mainBag.value = v;
+            if (ratioBagDisplay) ratioBagDisplay.textContent = `= ${Number(v).toLocaleString()} ${currentSym || 'token'}`;
+            const mainDisplay = document.getElementById("bag-amount-display");
+            if (mainDisplay) mainDisplay.textContent = `= ${Number(v).toLocaleString()} ${currentSym || 'token'}`;
+            renderTables();
+            renderRatioTable();
+          }
+        });
+      }
+
+      // Search bar ratio — réutilise wireSearchBar avec callback custom
+      (function wireRatioSearchBar() {
+        const inputEl = document.getElementById("add-ratio-input");
+        const acEl    = document.getElementById("add-ratio-autocomplete");
+        const btnEl   = document.getElementById("add-ratio-btn");
+        const errEl   = document.getElementById("add-ratio-error");
+        if (!inputEl || !btnEl) return;
+
+        const freshInput = inputEl.cloneNode(true);
+        inputEl.parentNode.replaceChild(freshInput, inputEl);
+        const freshBtn = btnEl.cloneNode(true);
+        btnEl.parentNode.replaceChild(freshBtn, btnEl);
+        freshBtn.disabled = true;
+
+        let rResults = [], rDebounce = null, rSelected = null;
+        freshInput.addEventListener("input", () => {
+          clearTimeout(rDebounce);
+          const q = freshInput.value.trim();
+          if (q.length < 2) { acEl.classList.remove("open"); acEl.innerHTML = ""; return; }
+          rDebounce = setTimeout(async () => {
+            try {
+              const data = await cgFetch("/search", { query: q });
+              rResults = (data.coins || []).slice(0, 6);
+              if (!rResults.length) { acEl.classList.remove("open"); return; }
+              acEl.innerHTML = rResults.map((c, i) => `
+                <div class="autocomplete-item" data-i="${i}">
+                  <img src="${c.thumb}" alt="" onerror="this.style.display='none'">
+                  <span class="autocomplete-symbol">${c.symbol.toUpperCase()}</span>
+                  <span class="autocomplete-name">${c.name}</span>
+                </div>`).join("");
+              acEl.querySelectorAll(".autocomplete-item").forEach((el, i) => {
+                el.addEventListener("mousedown", e => {
+                  e.preventDefault();
+                  rSelected = rResults[i];
+                  freshInput.value = `${rSelected.name} (${rSelected.symbol.toUpperCase()})`;
+                  freshBtn.disabled = false;
+                  acEl.classList.remove("open");
+                });
+              });
+              acEl.classList.add("open");
+            } catch { acEl.classList.remove("open"); }
+          }, 320);
+        });
+
+        freshBtn.addEventListener("click", async () => {
+          if (!rSelected) return;
+          // Vérifie si déjà présent dans compareCoins, extraCompareCoins ou ratioExtraCoins
+          const allIds = [...compareCoins, ...extraCompareCoins, ...ratioExtraCoins].map(c => c.id);
+          if (allIds.includes(rSelected.id) || rSelected.id === currentCoinId) {
+            // Déjà dans les données, juste ajouter à ratioExtraCoins si pas encore là
+            if (!ratioExtraCoins.find(c => c.id === rSelected.id) && !compareCoins.find(c => c.id === rSelected.id) && !extraCompareCoins.find(c => c.id === rSelected.id)) {
+              ratioExtraCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+            }
+            renderRatioTable();
+            freshInput.value = ""; rSelected = null; freshBtn.disabled = true;
+            return;
+          }
+          if (errEl) errEl.style.display = "none";
+          freshBtn.disabled = true; freshBtn.textContent = "Loading…";
+          try {
+            const res = await cgFetch("/coins/markets", { vs_currency: "usd", ids: rSelected.id, price_change_percentage: "7d,30d,90d" });
+            if (!res || !res[0]?.market_cap) throw new Error("No market data");
+            currentByIdRef[rSelected.id] = res[0];
+            currentPerfData[rSelected.id] = {
+              p7d:  res[0].price_change_percentage_7d_in_currency  ?? null,
+              p30d: res[0].price_change_percentage_30d_in_currency ?? null,
+              p90d: res[0].price_change_percentage_90d_in_currency ?? null,
+            };
+           ratioExtraCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+            extraCompareCoins.push({ label: rSelected.symbol.toUpperCase(), id: rSelected.id, removable: true });
+            renderTables();
+            renderPerfTable();
+            renderRatioTable();
+            load90dForAll();
+            freshInput.value = ""; rSelected = null; freshBtn.disabled = true;
+          } catch {
+            if (errEl) { errEl.textContent = "Could not fetch data."; errEl.style.display = "block"; }
+          } finally { freshBtn.textContent = "+ Add"; }
+        });
+      })();
+
+      // Render initial
+      renderRatioTable();
 
       // ── Market Context (points 2 & 3)
       let ctx="";
@@ -1799,6 +1956,163 @@
     } catch(e) {
       showToast("⚠ Screenshot failed.");
     }
+  }
+    // ═══════════════════════════════════════════════════════════════
+  // RATIO ANALYSIS — Section 6
+  // Calcul : ratio = prix_A / prix_B
+  // Perf ratio sur N jours :
+  //   prix_A_now / prix_B_now  vs  prix_A_Nd / prix_B_Nd
+  //   avec prix_Nd = prix_now / (1 + pct_Nd/100)
+  // Zéro appel API supplémentaire — tout vient de currentByIdRef + currentPerfData
+  // ═══════════════════════════════════════════════════════════════
+
+  // Coins spécifiques à la section Ratio (indépendant des autres sections)
+  let ratioExtraCoins = [];
+
+  function calcRatioPct(priceA, priceB, pctA, pctB) {
+    // pctA / pctB = % change sur la période (peut être null)
+    if (priceA == null || priceB == null || pctA == null || pctB == null) return null;
+    const priceA_old = priceA / (1 + pctA / 100);
+    const priceB_old = priceB / (1 + pctB / 100);
+    if (!priceB_old || !priceA_old) return null;
+    const ratioNow = priceA / priceB;
+    const ratioOld = priceA_old / priceB_old;
+    return ((ratioNow - ratioOld) / ratioOld) * 100;
+  }
+
+  function renderRatioTable() {
+    const wrap = document.getElementById("ratio-table-wrap");
+    if (!wrap) return;
+    if (!currentCoinId || !currentPrice) {
+      wrap.innerHTML = '<div class="chart-placeholder">Select a token and click Monitor ▶</div>';
+      return;
+    }
+
+    const allCoins = [...compareCoins, ...extraCompareCoins, ...ratioExtraCoins]
+      .filter((c, i, a) => a.findIndex(x => x.id === c.id) === i)
+      .filter(c => c.id !== currentCoinId);
+
+    if (!allCoins.length) {
+      wrap.innerHTML = '<div class="chart-placeholder">Add assets to compare using the search bar above.</div>';
+      return;
+    }
+
+    const bagAmt  = currentBagAmount || 1;
+    const priceA  = currentPrice;
+    const perfA   = currentPerfData[currentCoinId] || {};
+
+    const thead = `<tr>
+      <th>Pair</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortRatioTable('ratio')">Ratio (${currentSym}/X) ↕</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortRatioTable('7d')">7D ↕</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortRatioTable('30d')">30D ↕</th>
+      <th style="cursor:pointer;user-select:none" onclick="sortRatioTable('90d')">90D ↕</th>
+    </tr>`;
+
+    let rows = allCoins.map(coin => {
+      const d = currentByIdRef[coin.id];
+      const priceB = d?.current_price ?? null;
+      const perfB  = currentPerfData[coin.id] || {};
+
+      const ratioNow = priceA && priceB ? priceA / priceB : null;
+
+      const r7d  = calcRatioPct(priceA, priceB, perfA.p7d,  perfB.p7d);
+      const r30d = calcRatioPct(priceA, priceB, perfA.p30d, perfB.p30d);
+      const r90d = calcRatioPct(priceA, priceB, perfA.p90d, perfB.p90d);
+
+      return { coin, priceB, ratioNow, r7d, r30d, r90d };
+    });
+
+    // Sort
+    rows.sort((a, b) => {
+      const v = r => sortRatio.col === 'ratio' ? (r.ratioNow ?? -9999)
+                   : sortRatio.col === '7d'    ? (r.r7d  ?? -9999)
+                   : sortRatio.col === '30d'   ? (r.r30d ?? -9999)
+                   :                             (r.r90d ?? -9999);
+      return sortRatio.dir === 'desc' ? v(b) - v(a) : v(a) - v(b);
+    });
+
+    // Formatter le gain/loss en unités de l'asset B
+    function fmtRatioBagDelta(ratioPct, priceB, bagAmt) {
+      if (ratioPct == null || priceB == null) return "";
+      // Si le ratio LINK/BTC fait -10%, l'user a "perdu" 10% de son bag exprimé en BTC
+      // delta en USD = bag * priceA * ratioPct/100
+      // delta en unités B = delta_USD / priceB
+      const deltaUSD = bagAmt * priceA * (ratioPct / 100);
+      const deltaB   = deltaUSD / priceB;
+      const sign     = deltaB >= 0 ? "+" : "";
+      // Format intelligent
+      const abs = Math.abs(deltaB);
+        const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
+                        : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
+                        : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
+                        : abs >= 0.01 ? abs.toFixed(3)
+                        : abs.toFixed(4);
+      return ` <span style="color:#ffffff;font-size:14px">(${sign}${deltaB < 0 ? "-" : ""}${formatted} ${coin.label})</span>`;
+    }
+
+    function fmtRatioCell(ratioPct, priceB, coin) {
+      if (ratioPct == null) return `<span style="color:var(--muted);font-size:12px">loading…</span>`;
+      const col  = ratioPct >= 0 ? "#98ffb6" : "var(--pink)";
+      const arr  = ratioPct >= 0 ? "↑" : "↓";
+      const sign = ratioPct >= 0 ? "+" : "";
+      const delta = fmtRatioBagDelta(ratioPct, priceB, bagAmt);
+      return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span>${delta}`;
+    }
+
+    const tbody = rows.map(({ coin, priceB, ratioNow, r7d, r30d, r90d }) => {
+      const removable = `<button class="remove-btn" onclick="removeRatioCoin('${coin.id}')" title="Remove">✕</button>`;
+      const tagClass  = assetTagClass(coin.id, !!coin.removable);
+      const ratioStr  = ratioNow != null ? fmtPrice(ratioNow) : "N/A";
+
+      // fmtRatioCell a besoin de coin dans son closure, on le passe en paramètre
+      function fmtCell(ratioPct) {
+        if (ratioPct == null) return `<span style="color:var(--muted);font-size:12px">loading…</span>`;
+        const col  = ratioPct >= 0 ? "#98ffb6" : "var(--pink)";
+        const arr  = ratioPct >= 0 ? "↑" : "↓";
+        const sign = ratioPct >= 0 ? "+" : "";
+        if (priceB == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
+        const deltaUSD = bagAmt * priceA * (ratioPct / 100);
+        const deltaB   = deltaUSD / priceB;
+       const abs = Math.abs(deltaB);
+        const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
+                        : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
+                        : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
+                        : abs >= 0.01 ? abs.toFixed(3)
+                        : abs.toFixed(4);
+        const dsign = deltaB >= 0 ? "+" : "-";
+        return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-size:14px">(${dsign}${formatted} ${coin.label})</span>`;
+      }
+
+      return `<tr>
+        <td style="white-space:nowrap">${removable}<span class="${tagClass}">${currentSym}/${coin.label}</span></td>
+        <td style="color:var(--cyan);font-weight:700">${ratioStr}</td>
+        <td>${fmtCell(r7d)}</td>
+        <td>${fmtCell(r30d)}</td>
+        <td>${fmtCell(r90d)}</td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
+
+    wrap.innerHTML = `<div class="table-wrap"><table>
+      <thead>${thead}</thead>
+      <tbody>${tbody}</tbody>
+    </table></div>`;
+  }
+
+  let sortRatio = { col: "7d", dir: "desc" };
+  function sortRatioTable(col) {
+    sortRatio = sortRatio.col === col && sortRatio.dir === "desc" ? { col, dir: "asc" } : { col, dir: "desc" };
+    renderRatioTable();
+  }
+
+ function removeRatioCoin(id) {
+    ratioExtraCoins = ratioExtraCoins.filter(c => c.id !== id);
+    extraCompareCoins = extraCompareCoins.filter(c => c.id !== id);
+    const fixedIdx = compareCoins.findIndex(c => c.id === id);
+    if(fixedIdx !== -1) compareCoins.splice(fixedIdx, 1);
+    renderTables();
+    renderPerfTable();
+    renderRatioTable();
   }
 
   </script>
