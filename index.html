@@ -2102,6 +2102,8 @@ async function load90dForAll() {
  function removeRatioCoin(id) {
     ratioExtraCoins = ratioExtraCoins.filter(c => c.id !== id);
     extraCompareCoins = extraCompareCoins.filter(c => c.id !== id);
+    const fixedIdx = compareCoins.findIndex(c => c.id === id);
+    if(fixedIdx !== -1) compareCoins.splice(fixedIdx, 1);
     renderTables();
     renderPerfTable();
     renderRatioTable();
