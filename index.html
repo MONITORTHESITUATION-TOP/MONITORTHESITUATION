@@ -756,7 +756,7 @@
 </div><button class="screenshot-btn" onclick="takeScreenshot('perf-section','perf')">&#128247; Screenshot</button>
       </div>
       <div class="section-body">
-      <p class="section-sub" id="perf-sub">7D, 30D and 90D price performance of selected token vs comparison assets.</p>
+      <p class="section-sub" id="perf-sub">7D, 30D and 90D price performance of selected tokens against USD.</p>
       <div id="perf-table-wrap"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
       <!-- Mobile duplicate search bar -->
       <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)">
@@ -1503,7 +1503,7 @@ async function load90dForAll() {
       if(bagDisplay) bagDisplay.textContent = `= ${currentBagAmount.toLocaleString()} ${sym}`;
       renderTables();
       document.getElementById("perf-title").textContent=`Performance Comparison`;
-      document.getElementById("perf-sub").textContent=`7D, 30D and 90D performance — ${sym} vs comparison assets.`;
+      document.getElementById("perf-sub").textContent=`7D, 30D and 90D price performance of selected tokens against USD.`;
       renderPerfTable();
       load90dForAll(); // async — fills in 90D perf after initial render
 
