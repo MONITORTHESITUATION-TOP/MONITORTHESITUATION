@@ -1503,7 +1503,7 @@ async function load90dForAll() {
       if(bagDisplay) bagDisplay.textContent = `= ${currentBagAmount.toLocaleString()} ${sym}`;
       renderTables();
       document.getElementById("perf-title").textContent=`Performance Comparison`;
-      document.getElementById("perf-sub").textContent=`7D, 30D and 90D performance — ${sym} vs comparison assets.`;
+      document.getElementById("perf-sub").textContent=`7D, 30D and 90D performance against USD — ${sym}/USD vs comparison assets/USD.`;
       renderPerfTable();
       load90dForAll(); // async — fills in 90D perf after initial render
 
