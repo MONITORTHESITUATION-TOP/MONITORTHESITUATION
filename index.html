@@ -1379,12 +1379,13 @@ async function load90dForAll() {
       .concat(coinId==="chainlink"?[]:["chainlink"]).filter((v,i,a)=>a.indexOf(v)===i).join(",");
 
     try{
-      const [markets,detail,globalData,fearGreed,perfData]=await Promise.all([
+      const [markets,detail,globalData,fearGreed,perfData, altSeasonData]=await Promise.all([
         cgFetch("/coins/markets",{vs_currency:"usd",ids:allIds,price_change_percentage:"7d,30d,90d"}),
         cgFetch(`/coins/${coinId}`).catch(()=>null),
         cgFetch("/global").catch(()=>null),
         fetch("https://api.alternative.me/fng/?limit=1").then(r=>r.json()).catch(()=>null),
-        cgFetch("/coins/markets",{vs_currency:"usd",ids:allIds,price_change_percentage:"7d,30d,90d"}).catch(()=>[])
+        cgFetch("/coins/markets", { vs_currency: "usd", ids: allIds, price_change_percentage: "7d,30d,90d" }).catch(() => []),
+      fetch("https://api.coin-stats.com/v2/markets/chart/altcoin_season_index?type=3m").then(r => r.json()).catch(() => null),
       ]);
 
       const byId=Object.fromEntries(markets.map(c=>[c.id,c]));
@@ -1774,10 +1775,9 @@ async function load90dForAll() {
         // Point 2 : Altcoin season index via alternative.me
         const altSeasonRaw = fearGreed?.data?.[0]; // on va chercher séparément
         // BTC dom < 50% = altseason territory, on calcule un score simple
-        const altScore = btcDom ? Math.max(0, Math.min(100, Math.round((1 - btcDom/65) * 100))) : null;
-        const altLabel = altScore !== null
-          ? (altScore >= 75 ? "Altcoin Season 🟢" : altScore >= 50 ? "Neutral ⚪" : "Bitcoin Season 🟠")
-          : "N/A";
+       const lastEntry = altSeasonData?.altcoinSeasonIndexChart?.slice(-1)[0];
+const altScore = lastEntry?.altcoinSeasonIndex ?? null;
+const altLabel = altScore !== null ? altScore + "/100" : "N/A";
 
         ctx+=`<div class="metrics">
           <div class="metric"><span class="metric-label">BTC Dominance</span><span class="metric-value accent-cyan">${Number(btcDom).toFixed(2)}%</span></div>
@@ -1787,9 +1787,9 @@ async function load90dForAll() {
         </div><br>
         <div class="metrics">
           <div class="metric"><span class="metric-label">Total Market Cap</span><span class="metric-value accent-gold">${formatLargeNum(totalCap)}</span></div>
-          <div class="metric"><span class="metric-label">Fear &amp; Greed</span><span class="metric-value">${fear} <span style="font-size:18px;font-family:inherit">(${fearText})</span></span></div>
-          <div class="metric"><span class="metric-label">BTC/Alt Season</span><span class="metric-value" style="font-size:20px">${altLabel}</span></div>
-          <div class="metric"><span class="metric-label">Alt Season Score</span><span class="metric-value" style="color:${altScore>=75?"var(--green)":altScore>=50?"var(--muted)":"var(--gold)"}">${altScore!==null?altScore+"/100":"N/A"}</span></div>
+          <div class="metric"><span class="metric-label">Fear &amp; Greed</span><span class="metric-value">${fear} <span style="font-size:20px;font-family:inherit">(${fearText})</span></span></div>
+          <div class="metric"><span class="metric-label">BTC/Alt Season</span><span class="metric-value" style="font-size:20px">${altScore>=75?"Altcoin Season 🟢":(altScore>=45&&altScore<=55)?"Neutral ⚪":"Bitcoin Season 🟠"}</span></div>
+<div class="metric"><span class="metric-label">Alt Season Score</span><span class="metric-value alt-season-score" style="color:${altScore>=75?"var(--green)":altScore>=25?"var(--muted)":"var(--gold)"}">${altLabel}</span></div>
         </div><br>`;
       }
 
