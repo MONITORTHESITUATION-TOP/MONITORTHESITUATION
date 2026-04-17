@@ -2020,7 +2020,7 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const r30d = calcRatioPct(priceA, priceB, perfA.p30d, perfB.p30d);
       const r90d = calcRatioPct(priceA, priceB, perfA.p90d, perfB.p90d);
 
-      return { coin, priceB, perfB, ratioNow, r7d, r30d, r90d };
+      return { coin, priceB, ratioNow, r7d, r30d, r90d };
     });
 
     // Sort
@@ -2065,9 +2065,12 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const tagClass  = assetTagClass(coin.id, !!coin.removable);
       const ratioStr  = ratioNow != null ? fmtPrice(ratioNow) : "N/A";
       const perfA     = currentPerfData[currentCoinId] || {};
+      // perfB recalculé ici depuis currentPerfData — pas besoin de le passer dans le return du map précédent
+      const perfBLocal = currentPerfData[coin.id] || {};
 
-      // fmtCell: shows ratio % change + arbitrage delta expressed in units of asset B
-      // Question: "How many more/fewer units of B can I buy with my bag of A today vs N days ago?"
+      // fmtCell: ratio % + delta arbitrage en unités de B
+      // Question : "Avec mon bag de A, combien d'unités de B puis-je acheter aujourd'hui
+      //             vs il y a N jours ?"
       //   B_now    = (bagAmt × priceA_now)  / priceB_now
       //   B_before = (bagAmt × priceA_old)  / priceB_old
       //   deltaB   = B_now - B_before
@@ -2096,9 +2099,9 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${currentSym}/${coin.label}</span></td>
         <td style="color:var(--cyan);font-weight:700">${ratioStr}</td>
-        <td>${fmtCell(r7d,  perfA.p7d,  perfB.p7d)}</td>
-        <td>${fmtCell(r30d, perfA.p30d, perfB.p30d)}</td>
-        <td>${fmtCell(r90d, perfA.p90d, perfB.p90d)}</td>
+        <td>${fmtCell(r7d,  perfA.p7d,  perfBLocal.p7d)}</td>
+        <td>${fmtCell(r30d, perfA.p30d, perfBLocal.p30d)}</td>
+        <td>${fmtCell(r90d, perfA.p90d, perfBLocal.p90d)}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
 
