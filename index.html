@@ -2093,7 +2093,7 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
                         : abs >= 0.01 ? abs.toFixed(3)
                         : abs.toFixed(4);
         const dsign = deltaB >= 0 ? "+" : "-";
-        return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-size:14px">(${dsign}${formatted} ${coin.label})</span>`;
+        return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-weight:700">(${dsign}${formatted} ${coin.label})</span>`;
       }
 
       return `<tr>
