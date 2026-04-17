@@ -2065,24 +2065,27 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const tagClass  = assetTagClass(coin.id, !!coin.removable);
       const ratioStr  = ratioNow != null ? fmtPrice(ratioNow) : "N/A";
       const perfA     = currentPerfData[currentCoinId] || {};
+      // perfB recalculé ici depuis currentPerfData — pas besoin de le passer dans le return du map précédent
+      const perfBLocal = currentPerfData[coin.id] || {};
 
-      // fmtCell: shows ratio % change + bag gain/loss expressed in units of asset B
-      // Gain/loss = how much your bag of tokenA gained/lost in USD, converted to units of B
-      // Correct formula: deltaUSD = bag * priceA * (pctA/100)  where pctA = token's own % change
-      // NOT the ratio % (which amplifies both assets' moves and gives misleading numbers)
-      function fmtCell(ratioPct, pctA) {
+      // fmtCell: ratio % + delta arbitrage en unités de B
+      // Question : "Avec mon bag de A, combien d'unités de B puis-je acheter aujourd'hui
+      //             vs il y a N jours ?"
+      //   B_now    = (bagAmt × priceA_now)  / priceB_now
+      //   B_before = (bagAmt × priceA_old)  / priceB_old
+      //   deltaB   = B_now - B_before
+      function fmtCell(ratioPct, pctA, pctB) {
         if (ratioPct == null) return `<span style="color:var(--muted);font-size:12px">loading…</span>`;
         const col  = ratioPct >= 0 ? "#98ffb6" : "var(--pink)";
         const arr  = ratioPct >= 0 ? "↑" : "↓";
         const sign = ratioPct >= 0 ? "+" : "";
-        if (priceB == null || pctA == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
-        // Exact historical gain:
-        //   priceA_old = what tokenA cost N days ago
-        //   deltaUSD   = bag × (priceA_today − priceA_old)  ← real USD gain on the bag
-        //   deltaB     = deltaUSD / priceB_today             ← expressed in units of compared asset
+        if (priceB == null || pctA == null || pctB == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
         const priceA_old = priceA / (1 + pctA / 100);
-        const deltaUSD   = bagAmt * (priceA - priceA_old);
-        const deltaB     = deltaUSD / priceB;
+        const priceB_old = priceB / (1 + pctB / 100);
+        if (!priceB_old) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
+        const B_now    = (bagAmt * priceA)     / priceB;
+        const B_before = (bagAmt * priceA_old) / priceB_old;
+        const deltaB   = B_now - B_before;
         const abs = Math.abs(deltaB);
         const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
                         : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
@@ -2090,15 +2093,15 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
                         : abs >= 0.01 ? abs.toFixed(3)
                         : abs.toFixed(4);
         const dsign = deltaB >= 0 ? "+" : "-";
-        return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-size:14px">(${dsign}${formatted} ${coin.label})</span>`;
+        return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}% <span style="font-size:16px;vertical-align:middle">${arr}</span></span> <span style="color:#ffffff;font-weight:700">(${dsign}${formatted} ${coin.label})</span>`;
       }
 
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${currentSym}/${coin.label}</span></td>
         <td style="color:var(--cyan);font-weight:700">${ratioStr}</td>
-        <td>${fmtCell(r7d,  perfA.p7d)}</td>
-        <td>${fmtCell(r30d, perfA.p30d)}</td>
-        <td>${fmtCell(r90d, perfA.p90d)}</td>
+        <td>${fmtCell(r7d,  perfA.p7d,  perfBLocal.p7d)}</td>
+        <td>${fmtCell(r30d, perfA.p30d, perfBLocal.p30d)}</td>
+        <td>${fmtCell(r90d, perfA.p90d, perfBLocal.p90d)}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
 
