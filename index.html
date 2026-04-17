@@ -2020,7 +2020,7 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const r30d = calcRatioPct(priceA, priceB, perfA.p30d, perfB.p30d);
       const r90d = calcRatioPct(priceA, priceB, perfA.p90d, perfB.p90d);
 
-      return { coin, priceB, ratioNow, r7d, r30d, r90d };
+      return { coin, priceB, perfB, ratioNow, r7d, r30d, r90d };
     });
 
     // Sort
@@ -2067,11 +2067,9 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const perfA     = currentPerfData[currentCoinId] || {};
 
       // fmtCell: shows ratio % change + arbitrage delta expressed in units of asset B
-      // Question answered: "How many more/fewer units of B can I buy with my bag of A today
-      //   compared to N days ago?"
-      // Formula:
-      //   B_now    = (bagAmt × priceA_now) / priceB_now
-      //   B_before = (bagAmt × priceA_old) / priceB_old
+      // Question: "How many more/fewer units of B can I buy with my bag of A today vs N days ago?"
+      //   B_now    = (bagAmt × priceA_now)  / priceB_now
+      //   B_before = (bagAmt × priceA_old)  / priceB_old
       //   deltaB   = B_now - B_before
       function fmtCell(ratioPct, pctA, pctB) {
         if (ratioPct == null) return `<span style="color:var(--muted);font-size:12px">loading…</span>`;
