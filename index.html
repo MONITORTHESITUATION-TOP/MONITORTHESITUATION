@@ -2064,17 +2064,26 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       const removable = `<button class="remove-btn" onclick="removeRatioCoin('${coin.id}')" title="Remove">✕</button>`;
       const tagClass  = assetTagClass(coin.id, !!coin.removable);
       const ratioStr  = ratioNow != null ? fmtPrice(ratioNow) : "N/A";
+      const perfA     = currentPerfData[currentCoinId] || {};
 
-      // fmtRatioCell a besoin de coin dans son closure, on le passe en paramètre
-      function fmtCell(ratioPct) {
+      // fmtCell: shows ratio % change + bag gain/loss expressed in units of asset B
+      // Gain/loss = how much your bag of tokenA gained/lost in USD, converted to units of B
+      // Correct formula: deltaUSD = bag * priceA * (pctA/100)  where pctA = token's own % change
+      // NOT the ratio % (which amplifies both assets' moves and gives misleading numbers)
+      function fmtCell(ratioPct, pctA) {
         if (ratioPct == null) return `<span style="color:var(--muted);font-size:12px">loading…</span>`;
         const col  = ratioPct >= 0 ? "#98ffb6" : "var(--pink)";
         const arr  = ratioPct >= 0 ? "↑" : "↓";
         const sign = ratioPct >= 0 ? "+" : "";
-        if (priceB == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
-        const deltaUSD = bagAmt * priceA * (ratioPct / 100);
-        const deltaB   = deltaUSD / priceB;
-       const abs = Math.abs(deltaB);
+        if (priceB == null || pctA == null) return `<span style="color:${col};font-weight:700">${sign}${ratioPct.toFixed(2)}%</span>`;
+        // Exact historical gain:
+        //   priceA_old = what tokenA cost N days ago
+        //   deltaUSD   = bag × (priceA_today − priceA_old)  ← real USD gain on the bag
+        //   deltaB     = deltaUSD / priceB_today             ← expressed in units of compared asset
+        const priceA_old = priceA / (1 + pctA / 100);
+        const deltaUSD   = bagAmt * (priceA - priceA_old);
+        const deltaB     = deltaUSD / priceB;
+        const abs = Math.abs(deltaB);
         const formatted = abs >= 10000 ? abs.toLocaleString(undefined,{maximumFractionDigits:0})
                         : abs >= 100  ? abs.toLocaleString(undefined,{maximumFractionDigits:1})
                         : abs >= 1    ? abs.toLocaleString(undefined,{maximumFractionDigits:2})
@@ -2087,9 +2096,9 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       return `<tr>
         <td style="white-space:nowrap">${removable}<span class="${tagClass}">${currentSym}/${coin.label}</span></td>
         <td style="color:var(--cyan);font-weight:700">${ratioStr}</td>
-        <td>${fmtCell(r7d)}</td>
-        <td>${fmtCell(r30d)}</td>
-        <td>${fmtCell(r90d)}</td>
+        <td>${fmtCell(r7d,  perfA.p7d)}</td>
+        <td>${fmtCell(r30d, perfA.p30d)}</td>
+        <td>${fmtCell(r90d, perfA.p90d)}</td>
       </tr>`;
     }).join("") || `<tr><td colspan="5" style="color:var(--muted)">No data.</td></tr>`;
 
