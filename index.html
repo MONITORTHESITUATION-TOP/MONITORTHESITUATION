@@ -605,7 +605,31 @@
   font-family: 'Rajdhani', monospace;
 }
     
-  </style>
+  
+    /* ── MOBILE: screenshot icon only ── */
+    @media (max-width: 768px) {
+      .screenshot-label { display: none; }
+      .screenshot-btn { padding: 8px 10px; gap: 0; }
+    }
+
+    /* ── ROTATE HINT — portrait mobile only ── */
+    .rotate-hint { display: none; }
+    @media (max-width: 768px) and (orientation: portrait) {
+      .rotate-hint {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        background: rgba(126,224,255,0.05);
+        border-bottom: 1px solid rgba(126,224,255,0.1);
+        font-family: 'DM Mono', monospace;
+        font-size: 12px;
+        color: rgba(126,224,255,0.55);
+        letter-spacing: 0.3px;
+      }
+      .rotate-hint-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+    }
+</style>
 
 
 </head>
@@ -650,7 +674,9 @@
       </div>
     </section>
 
-    <section class="section" id="chart-section" style="display:none">
+    
+    <div class="rotate-hint"><span class="rotate-hint-icon">↺</span><span>Rotate your phone for best experience</span></div>
+<section class="section" id="chart-section" style="display:none">
       <div class="section-titlebar"><span class="section-title" id="chart-title">Chart</span></div>
       <div class="section-body">
       <p class="section-sub" id="chart-sub">Live TradingView chart.</p>
@@ -662,7 +688,7 @@
       <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="metrics-title">Core Metrics</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
-</div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247; Screenshot</button></div>
+</div><button class="screenshot-btn" onclick="takeScreenshot('metrics-section','core-metrics')">&#128247;<span class="screenshot-label"> Screenshot</span></button></div>
       <div class="section-body">
       <p class="section-sub" id="metrics-sub">Live snapshot of valuation metrics from CoinGecko.</p>
       <div id="main-data"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
@@ -672,7 +698,7 @@
       <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title">Market Context</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
-</div><button class="screenshot-btn" onclick="takeScreenshot('mktctx-section','market-context')">&#128247; Screenshot</button></div>
+</div><button class="screenshot-btn" onclick="takeScreenshot('mktctx-section','market-context')">&#128247;<span class="screenshot-label"> Screenshot</span></button></div>
       <div class="section-body">
       <p class="section-sub">Broader market positioning, relative performance, and valuation signal.</p>
       <div id="market-context"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
@@ -683,7 +709,7 @@
       <div class="section-titlebar-row"><div class="section-titlebar" style="margin:0"><span class="section-title" id="comp-title">Price simulation</span></div><div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
-</div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247; Screenshot</button></div>
+</div><button class="screenshot-btn" onclick="takeScreenshot('comp-section','comparison')">&#128247;<span class="screenshot-label"> Screenshot</span></button></div>
       <div class="section-body">
       <p class="section-sub" id="comp-sub">What would this token cost at each asset's market cap?</p>
 
@@ -715,7 +741,7 @@
       <span class="wm-text-monitor">MONITOR</span>
       <span class="wm-text-sit">THESITUATION.TOP</span>
     </div>
-    <button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247; Screenshot</button>
+    <button class="screenshot-btn" onclick="takeScreenshot('bag-section','bag-simulation')">&#128247;<span class="screenshot-label"> Screenshot</span></button>
   </div>
   <div class="section-body">
     <p class="section-sub">Estimated value of your holdings at each simulated target price.</p>
@@ -753,7 +779,7 @@
         <div class="wm-badge">
   <span class="wm-text-monitor">MONITOR</span>
   <span class="wm-text-sit">THESITUATION.TOP</span>
-</div><button class="screenshot-btn" onclick="takeScreenshot('perf-section','perf')">&#128247; Screenshot</button>
+</div><button class="screenshot-btn" onclick="takeScreenshot('perf-section','perf')">&#128247;<span class="screenshot-label"> Screenshot</span></button>
       </div>
       <div class="section-body">
       <p class="section-sub" id="perf-sub">7D, 30D and 90D price performance of selected tokens against USD.</p>
@@ -785,10 +811,10 @@
           <span class="wm-text-monitor">MONITOR</span>
           <span class="wm-text-sit">THESITUATION.TOP</span>
         </div>
-        <button class="screenshot-btn" onclick="takeScreenshot('ratio-section','ratio-analysis')">&#128247; Screenshot</button>
+        <button class="screenshot-btn" onclick="takeScreenshot('ratio-section','ratio-analysis')">&#128247;<span class="screenshot-label"> Screenshot</span></button>
       </div>
       <div class="section-body">
-        <p class="section-sub">Compare the performance of your asset against others and calculate your gains &amp; losses, expressed in compared asset units.</p>
+        <p class="section-sub">How does your bag perform against other assets? Enter your position size and compare gains and losses expressed directly in compared asset units. This allows you to monitor arbitrage opportunities between assets, in clicks.</p>
 
         <!-- Controls row : search + bag -->
         <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px;flex-wrap:wrap">
@@ -812,7 +838,7 @@
         <div id="add-ratio-error" style="margin-bottom:10px;font-size:13px;color:var(--pink);display:none"></div>
 
         <div id="ratio-table-wrap"><div class="chart-placeholder">Select a token and click Monitor ▶</div></div>
-        <div class="footer-note" style="margin-top:10px">Ratios calculated from USD prices — synthetic pairs. Gain/loss expressed in units of the compared asset.</div>
+        <p class="section-sub" style="margin-top:18px;margin-bottom:0" id="ratio-footer-note">Ratios calculated from USD prices — synthetic pairs. Gain/loss expressed in units of the compared asset.</p>
       </div>
     </section>
 
@@ -1506,7 +1532,10 @@ async function load90dForAll() {
       document.getElementById("perf-title").textContent=`Performance Comparison`;
       document.getElementById("perf-sub").textContent=`7D, 30D and 90D price performance of selected tokens against USD.`;
       renderPerfTable();
-      load90dForAll(); // async — fills in 90D perf after initial render
+      load90dForAll();
+      // Update ratio footer note with dynamic token symbol
+      const rfn = document.getElementById("ratio-footer-note");
+      if (rfn) rfn.innerHTML = `Reading example: <strong>+1.5 ETH gains over 90D</strong> means that you gain +1.5 ETH compared to 90d ago if you swap ${sym} for ETH today — a direct arbitrage gain. <strong>-1.5 ETH over 90D</strong> means the opposite: you materialize a -1.5 ETH loss if you swap ${sym} for ETH today compared to swapping it 90 days ago.`; // async — fills in 90D perf after initial render
 
       // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
       const addInputEl = document.getElementById("add-compare-input");
@@ -1920,7 +1949,21 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
 
   async function doScreenshot(el, filename) {
   el.classList.add("screenshot-mode");
-  await new Promise(r => setTimeout(r, 50));
+
+  // Expand overflow so html2canvas captures full table width
+  const tableWraps = el.querySelectorAll(".table-wrap");
+  const savedStyles = [];
+  tableWraps.forEach(function(tw) {
+    savedStyles.push({ overflowX: tw.style.overflowX, width: tw.style.width });
+    tw.style.overflowX = "visible";
+    tw.style.width     = "max-content";
+  });
+  const savedW = el.style.width;
+  const savedO = el.style.overflow;
+  el.style.width    = "max-content";
+  el.style.overflow = "visible";
+
+  await new Promise(r => setTimeout(r, 60));
 
   try {
     const canvas = await html2canvas(el, {
@@ -1928,10 +1971,17 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
       scale: 2,
       useCORS: true,
       logging: false,
+      windowWidth: el.scrollWidth,
+      width: el.scrollWidth,
     });
-
     finishDownload(canvas, filename);
   } finally {
+    tableWraps.forEach(function(tw, i) {
+      tw.style.overflowX = savedStyles[i].overflowX;
+      tw.style.width     = savedStyles[i].width;
+    });
+    el.style.width    = savedW;
+    el.style.overflow = savedO;
     el.classList.remove("screenshot-mode");
   }
 }
