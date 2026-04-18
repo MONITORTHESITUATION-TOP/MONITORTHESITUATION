@@ -1514,7 +1514,7 @@ async function load90dForAll() {
       load90dForAll();
       // Update ratio footer note with dynamic token symbol
       const rfn = document.getElementById("ratio-footer-note");
-      if (rfn) rfn.innerHTML = `Hypothetical reading example: <strong>+1.5 ETH gains over 90D</strong> means that you gain +1.5 ETH compared to 90d ago if you swap ${sym} for ETH today — a direct arbitrage gain. <strong>-1.5 ETH over 90D</strong> means the opposite: you materialize a -1.5 ETH loss if you swap ${sym} for ETH today compared to swapping it 90 days ago.`; // async — fills in 90D perf after initial render
+      if (rfn) rfn.innerHTML = `Hypothetical reading example: <strong>+1.5 ETH gains over 90d</strong> means that you gain +1.5 ETH compared to 90d ago if you swap ${sym} for ETH today — a direct arbitrage gain. <strong>-1.5 ETH over 90d</strong> means the opposite: you materialize a -1.5 ETH loss if you swap ${sym} for ETH today.`; // async — fills in 90D perf after initial render
 
       // Add compare — wire sur les éléments statiques du HTML (clone pour reset)
       const addInputEl = document.getElementById("add-compare-input");
