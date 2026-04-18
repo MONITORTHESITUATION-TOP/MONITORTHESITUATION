@@ -1942,6 +1942,16 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
   el.style.width    = "max-content";
   el.style.overflow = "visible";
 
+  // Neutralise sticky positioning on th — prevents header row from floating
+  // at its on-screen position while table body expands for the capture.
+  // Restore immediately after capture. No effect on desktop rendering.
+  const stickyThs = el.querySelectorAll("th");
+  const savedThPos = [];
+  stickyThs.forEach(function(th) {
+    savedThPos.push(th.style.position);
+    th.style.position = "relative";
+  });
+
   await new Promise(r => setTimeout(r, 60));
 
   try {
@@ -1955,6 +1965,10 @@ const altLabel = altScore !== null ? altScore + "/100" : "N/A";
     });
     finishDownload(canvas, filename);
   } finally {
+    // Restore th sticky positioning
+    stickyThs.forEach(function(th, i) {
+      th.style.position = savedThPos[i];
+    });
     tableWraps.forEach(function(tw, i) {
       tw.style.overflowX = savedStyles[i].overflowX;
       tw.style.width     = savedStyles[i].width;
